@@ -1,0 +1,6 @@
+{
+  "name": "Lumina Learning",
+  "description": "A minimalist and modern subject selection portal.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
