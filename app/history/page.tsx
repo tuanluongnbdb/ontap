@@ -57,6 +57,7 @@ const playSound = (type: 'correct' | 'incorrect' | 'click') => {
 export default function HistoryPage() {
   const [mode, setMode] = useState<QuizMode>('selection');
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [wrongQuestions, setWrongQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -66,8 +67,10 @@ export default function HistoryPage() {
 
   const currentQuestion = questions[currentIndex];
 
-  const startQuiz = useCallback(() => {
+  const startQuiz = useCallback((quizQuestions: Question[]) => {
     setMode('quiz');
+    setQuestions(quizQuestions);
+    setWrongQuestions([]);
     setCurrentIndex(0);
     setScore(0);
     setSelectedAnswer(null);
@@ -80,14 +83,19 @@ export default function HistoryPage() {
     playSound('click');
     const allQuestions = HISTORY_DATA.flatMap(topic => topic.questions);
     const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
-    setQuestions(shuffled);
-    startQuiz();
+    startQuiz(shuffled);
   };
 
   const handleSelectTopic = (topic: Topic) => {
     playSound('click');
-    setQuestions(topic.questions);
-    startQuiz();
+    startQuiz(topic.questions);
+  };
+
+  const handleReviewWrong = () => {
+    playSound('click');
+    if (wrongQuestions.length > 0) {
+      startQuiz(wrongQuestions);
+    }
   };
 
   const handleAnswer = useCallback((option: string) => {
@@ -100,6 +108,7 @@ export default function HistoryPage() {
       setScore(prev => prev + 1);
       playSound('correct');
     } else {
+      setWrongQuestions(prev => [...prev, currentQuestion]);
       playSound('incorrect');
     }
   }, [isAnswered, currentQuestion]);
@@ -158,7 +167,7 @@ export default function HistoryPage() {
         </div>
       </nav>
 
-      <main className="flex-1 flex flex-col items-center justify-center px-6 sm:px-12 py-8 max-w-4xl mx-auto w-full">
+      <main className="flex-1 flex flex-col items-center justify-center px-4 sm:px-12 py-4 sm:py-8 max-w-4xl mx-auto w-full">
         <AnimatePresence mode="wait">
           {/* Mode Selection */}
           {mode === 'selection' && (
@@ -167,34 +176,34 @@ export default function HistoryPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.05 }}
-              className="w-full space-y-12 text-center"
+              className="w-full space-y-8 sm:space-y-12 text-center"
             >
               <div className="space-y-4">
-                <h1 className="text-4xl font-bold text-slate-900">Môn Lịch Sử</h1>
-                <p className="text-slate-500 italic">Chọn phương thức ôn tập để bắt đầu</p>
+                <h1 className="text-3xl sm:text-4xl font-bold text-slate-900">Môn Lịch Sử</h1>
+                <p className="text-slate-500 italic text-sm">Chọn phương thức ôn tập để bắt đầu</p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                 <button 
                   onClick={() => { playSound('click'); setMode('topic-list'); }}
-                  className="group bg-white p-10 rounded-3xl border border-slate-200 shadow-sm hover:border-slate-900 hover:shadow-xl transition-all text-left"
+                  className="group bg-white p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-sm hover:border-slate-900 hover:shadow-xl transition-all text-left"
                 >
-                  <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-slate-900 group-hover:text-white transition-all">
-                    <BookOpen size={28} />
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 group-hover:bg-slate-900 group-hover:text-white transition-all">
+                    <BookOpen size={24} />
                   </div>
-                  <h3 className="text-2xl font-bold text-slate-900 mb-2">Theo chủ đề</h3>
-                  <p className="text-slate-400">Ôn tập tuần tự các kiến thức theo từng chương học phần.</p>
+                  <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">Theo chủ đề</h3>
+                  <p className="text-slate-400 text-sm">Ôn tập tuần tự các kiến thức theo từng chương học phần.</p>
                 </button>
 
                 <button 
                   onClick={handleStartRandom}
-                  className="group bg-white p-10 rounded-3xl border border-slate-200 shadow-sm hover:border-slate-900 hover:shadow-xl transition-all text-left"
+                  className="group bg-white p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-sm hover:border-slate-900 hover:shadow-xl transition-all text-left"
                 >
-                  <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-slate-900 group-hover:text-white transition-all">
-                    <Shuffle size={28} />
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 group-hover:bg-slate-900 group-hover:text-white transition-all">
+                    <Shuffle size={24} />
                   </div>
-                  <h3 className="text-2xl font-bold text-slate-900 mb-2">Ngẫu nhiên</h3>
-                  <p className="text-slate-400">Thử thách bản thân với bộ câu hỏi được trộn từ tất cả các chủ đề.</p>
+                  <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">Ngẫu nhiên</h3>
+                  <p className="text-slate-400 text-sm">Thử thách bản thân với bộ câu hỏi được trộn từ tất cả các chủ đề.</p>
                 </button>
               </div>
             </motion.div>
@@ -207,10 +216,10 @@ export default function HistoryPage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="w-full space-y-8"
+              className="w-full space-y-6 sm:space-y-8"
             >
               <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-bold text-slate-900">Danh sách chủ đề</h2>
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">Danh sách chủ đề</h2>
                 <button 
                   onClick={() => { playSound('click'); setMode('selection'); }}
                   className="text-sm font-medium text-slate-400 hover:text-slate-900 transition-colors"
@@ -219,7 +228,7 @@ export default function HistoryPage() {
                 </button>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {HISTORY_DATA.map((topic, index) => (
                   <motion.button
                     key={topic.id}
@@ -227,14 +236,14 @@ export default function HistoryPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                     onClick={() => handleSelectTopic(topic)}
-                    className="w-full p-6 text-left bg-white border border-slate-100 rounded-2xl hover:border-slate-900 transition-all flex items-center justify-between group shadow-sm hover:shadow-md"
+                    className="w-full p-4 sm:p-6 text-left bg-white border border-slate-100 rounded-2xl hover:border-slate-900 transition-all flex items-center justify-between group shadow-sm hover:shadow-md"
                   >
                     <div className="space-y-1">
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Chủ đề {index + 1}</p>
-                      <h4 className="text-lg font-bold text-slate-900 group-hover:translate-x-1 transition-transform">{topic.title}</h4>
-                      <p className="text-xs text-slate-400">{topic.questions.length} câu hỏi</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Chủ đề {index + 1}</p>
+                      <h4 className="text-base sm:text-lg font-bold text-slate-900 group-hover:translate-x-1 transition-transform">{topic.title}</h4>
+                      <p className="text-[10px] text-slate-400">{topic.questions.length} câu hỏi</p>
                     </div>
-                    <ArrowRight className="text-slate-200 group-hover:text-slate-900 transition-colors" />
+                    <ArrowRight className="text-slate-200 group-hover:text-slate-900 transition-colors flex-shrink-0 ml-4" size={20} />
                   </motion.button>
                 ))}
               </div>
@@ -248,11 +257,11 @@ export default function HistoryPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="w-full max-w-2xl space-y-8"
+              className="w-full max-w-2xl space-y-6 sm:space-y-8"
             >
               {/* Progress */}
               <div className="space-y-2">
-                <div className="flex justify-between text-xs font-bold text-slate-400 uppercase tracking-widest">
+                <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                   <span>Câu hỏi {currentIndex + 1} / {questions.length}</span>
                   <span>Đúng: {score}</span>
                 </div>
@@ -266,14 +275,14 @@ export default function HistoryPage() {
               </div>
 
               {/* Question */}
-              <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
-                <h2 className="text-2xl font-bold text-slate-900 leading-tight">
+              <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-sm">
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-900 leading-tight">
                   {currentQuestion.question}
                 </h2>
               </div>
 
               {/* Options */}
-              <div className="grid grid-cols-1 gap-3">
+              <div className="grid grid-cols-1 gap-2 sm:gap-3">
                 {currentQuestion.options.map((option, idx) => {
                   const isCorrectResult = isAnswered && option === currentQuestion.answer;
                   const isWrongResult = isAnswered && selectedAnswer === option && option !== currentQuestion.answer;
@@ -285,16 +294,16 @@ export default function HistoryPage() {
                       onClick={() => handleAnswer(option)}
                       disabled={isAnswered}
                       className={cn(
-                        "p-5 rounded-2xl border-2 text-left transition-all relative flex items-center justify-between group",
+                        "p-4 sm:p-5 rounded-2xl border-2 text-left transition-all relative flex items-center justify-between group min-h-[64px]",
                         !isAnswered && "border-slate-100 hover:border-slate-900 bg-white",
                         isAnswered && option === currentQuestion.answer && "border-green-500 bg-green-50 text-green-900",
                         isAnswered && selectedAnswer === option && option !== currentQuestion.answer && "border-red-500 bg-red-50 text-red-900",
                         isAnswered && selectedAnswer !== option && option !== currentQuestion.answer && "border-slate-50 bg-white opacity-50"
                       )}
                     >
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-3 sm:gap-4 flex-1">
                         <span className={cn(
-                          "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors",
+                          "w-7 h-7 sm:w-8 sm:h-8 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold transition-colors",
                           !isAnswered && "bg-slate-50 text-slate-400 group-hover:bg-slate-900 group-hover:text-white",
                           isCorrectResult && "bg-green-500 text-white",
                           isWrongResult && "bg-red-500 text-white",
@@ -302,31 +311,31 @@ export default function HistoryPage() {
                         )}>
                           {idx + 1}
                         </span>
-                        <span className="font-medium">{option}</span>
+                        <span className="font-medium text-sm sm:text-base leading-snug">{option}</span>
                       </div>
                       
-                      {isCorrectResult && <CheckCircle2 className="text-green-500" size={20} />}
-                      {isWrongResult && <XCircle className="text-red-500" size={20} />}
+                      {isCorrectResult && <CheckCircle2 className="text-green-500 shrink-0" size={18} />}
+                      {isWrongResult && <XCircle className="text-red-500 shrink-0" size={18} />}
                     </motion.button>
                   );
                 })}
               </div>
 
               {/* Footer Quiz */}
-              <div className="flex justify-between items-center text-slate-400 text-xs font-medium italic">
-                <div className="flex gap-4">
+              <div className="flex justify-between items-center text-slate-400 text-[10px] font-medium italic">
+                <div className="flex flex-col sm:flex-row gap-1 sm:gap-4">
                   <span>Dùng phím 1-4 để chọn</span>
-                  <span>Enter để tiếp tục</span>
+                  <span className="hidden sm:inline">Enter để tiếp tục</span>
                 </div>
                 {isAnswered && (
                   <motion.button
                     initial={{ opacity: 0, x: 10 }}
                     animate={{ opacity: 1, x: 0 }}
                     onClick={handleNext}
-                    className="flex items-center gap-2 text-slate-900 font-bold not-italic"
+                    className="flex items-center gap-2 text-slate-900 font-bold not-italic group"
                   >
-                    {currentIndex === questions.length - 1 ? 'Xem kết quả' : 'Câu tiếp theo'}
-                    <ArrowRight size={16} />
+                    <span className="text-xs">{currentIndex === questions.length - 1 ? 'Xem kết quả' : 'Câu tiếp theo'}</span>
+                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                   </motion.button>
                 )}
               </div>
@@ -339,43 +348,55 @@ export default function HistoryPage() {
               key="result"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="w-full max-w-lg space-y-12 text-center"
+              className="w-full max-w-lg space-y-8 sm:space-y-12 text-center"
             >
               <div className="space-y-6">
-                <div className="inline-block p-6 rounded-full bg-slate-900 text-white mb-4">
-                  <CheckCircle2 size={48} />
+                <div className="inline-block p-4 sm:p-6 rounded-full bg-slate-900 text-white mb-2 underline-none">
+                  <CheckCircle2 size={40} className="sm:w-[48px] sm:h-[48px]" />
                 </div>
-                <h1 className="text-4xl font-bold text-slate-900 uppercase tracking-tighter">Hoàn thành!</h1>
-                <div className="flex justify-center gap-12">
+                <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 uppercase tracking-tighter">Hoàn thành!</h1>
+                <div className="flex justify-center gap-8 sm:gap-12">
                   <div className="space-y-1">
-                    <p className="text-5xl font-black text-slate-900">{score}/{questions.length}</p>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Điểm số</p>
+                    <p className="text-4xl sm:text-5xl font-black text-slate-900">{score}/{questions.length}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Điểm số</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-5xl font-black text-slate-900">{Math.round((score / questions.length) * 100)}%</p>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Độ chính xác</p>
+                    <p className="text-4xl sm:text-5xl font-black text-slate-900">{Math.round((score / questions.length) * 100)}%</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Độ chính xác</p>
                   </div>
                 </div>
-                <p className="text-slate-400 text-sm italic">Thời gian hoàn thành: {quizDuration} giây</p>
+                <p className="text-slate-400 text-xs italic">Thời gian hoàn thành: {quizDuration} giây</p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <button 
-                  onClick={() => { playSound('click'); setMode('selection'); }}
-                  className="flex items-center justify-center gap-3 py-5 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all active:scale-95 shadow-lg"
+              <div className="flex flex-col gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button 
+                    onClick={() => handleStartRandom()}
+                    className="flex items-center justify-center gap-3 py-4 sm:py-5 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all active:scale-95 shadow-lg text-sm sm:text-base"
+                  >
+                    <RotateCcw size={18} />
+                    ÔN LẠI TỪ ĐẦU
+                  </button>
+                  <Link 
+                    href="/"
+                    className="flex items-center justify-center gap-3 py-4 sm:py-5 bg-white text-slate-900 border border-slate-200 rounded-2xl font-bold hover:border-slate-900 transition-all active:scale-95 text-sm sm:text-base"
+                  >
+                    <Home size={18} />
+                    VỀ TRANG CHỦ
+                  </Link>
+                </div>
+                
+                {wrongQuestions.length > 0 && (
+                  <button 
+                  onClick={handleReviewWrong}
+                  className="flex items-center justify-center gap-3 py-4 sm:py-5 bg-red-50 text-red-600 border border-red-100 rounded-2xl font-bold hover:bg-red-100 transition-all active:scale-95 text-sm sm:text-base"
                 >
-                  <RotateCcw size={20} />
-                  ÔN LẠI
+                  <BookOpen size={18} />
+                  ÔN LẠI CÂU SAI ({wrongQuestions.length})
                 </button>
-                <Link 
-                  href="/"
-                  className="flex items-center justify-center gap-3 py-5 bg-white text-slate-900 border border-slate-200 rounded-2xl font-bold hover:border-slate-900 transition-all active:scale-95"
-                >
-                  <Home size={20} />
-                  VỀ TRANG CHỦ
-                </Link>
+                )}
               </div>
-              <p className="text-xs text-slate-400 italic">Nhấn Enter để quay lại danh mục</p>
+              <p className="text-[10px] text-slate-400 italic">Nhấn Enter để quay lại trang chọn</p>
             </motion.div>
           )}
         </AnimatePresence>

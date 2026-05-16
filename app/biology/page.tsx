@@ -58,24 +58,28 @@ const playSound = (type: 'correct' | 'incorrect' | 'click') => {
 export default function BiologyPage() {
   const [mode, setMode] = useState<QuizMode>('selection');
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [wrongQuestions, setWrongQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [tfAnswers, setTfAnswers] = useState<Record<string, boolean | null>>({});
+  const [matchingAnswers, setMatchingAnswers] = useState<Record<string, string>>({});
   const [isAnswered, setIsAnswered] = useState(false);
   const [quizStartTime, setQuizStartTime] = useState<number>(0);
   const [quizDuration, setQuizDuration] = useState<number>(0);
 
   const currentQuestion = questions[currentIndex];
 
-  const startQuiz = useCallback(() => {
+  const startQuiz = useCallback((quizQuestions: Question[]) => {
     setMode('quiz');
+    setQuestions(quizQuestions);
+    setWrongQuestions([]);
     setCurrentIndex(0);
     setScore(0);
     setSelectedAnswer(null);
+    setTfAnswers({});
+    setMatchingAnswers({});
     setIsAnswered(false);
-    // Use an effect to set start time to avoid purity issues if needed, 
-    // but here we are in a callback which is generally fine.
-    // However, to be extra safe for the linter:
     const now = Date.now();
     setQuizStartTime(now);
   }, []);
@@ -84,18 +88,37 @@ export default function BiologyPage() {
     playSound('click');
     const allQuestions = BIOLOGY_DATA.flatMap(topic => topic.questions);
     const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
-    setQuestions(shuffled);
-    startQuiz();
+    startQuiz(shuffled);
   };
 
   const handleSelectTopic = (topic: Topic) => {
     playSound('click');
-    setQuestions(topic.questions);
-    startQuiz();
+    startQuiz(topic.questions);
   };
 
+  const handleReviewWrong = () => {
+    playSound('click');
+    if (wrongQuestions.length > 0) {
+      startQuiz(wrongQuestions);
+    }
+  };
+
+  const checkCompositeCorrect = useCallback(() => {
+    if (!currentQuestion) return false;
+    if (currentQuestion.type === 'choice') {
+      return selectedAnswer === currentQuestion.answer;
+    }
+    if (currentQuestion.type === 'true-false') {
+      return currentQuestion.statements.every(s => tfAnswers[s.id] === s.answer);
+    }
+    if (currentQuestion.type === 'matching') {
+      return currentQuestion.pairs.every(p => matchingAnswers[p.left] === p.right);
+    }
+    return false;
+  }, [currentQuestion, selectedAnswer, tfAnswers, matchingAnswers]);
+
   const handleAnswer = useCallback((option: string) => {
-    if (isAnswered) return;
+    if (isAnswered || !currentQuestion || currentQuestion.type !== 'choice') return;
     
     setSelectedAnswer(option);
     setIsAnswered(true);
@@ -104,9 +127,37 @@ export default function BiologyPage() {
       setScore(prev => prev + 1);
       playSound('correct');
     } else {
+      setWrongQuestions(prev => [...prev, currentQuestion]);
       playSound('incorrect');
     }
   }, [isAnswered, currentQuestion]);
+
+  const handleTFAnswer = (statementId: string, value: boolean) => {
+    if (isAnswered) return;
+    playSound('click');
+    setTfAnswers(prev => ({ ...prev, [statementId]: value }));
+  };
+
+  const handleMatchingAnswer = (left: string, right: string) => {
+    if (isAnswered) return;
+    playSound('click');
+    setMatchingAnswers(prev => ({ ...prev, [left]: right }));
+  };
+
+  const handleValidateComposite = useCallback(() => {
+    if (isAnswered) return;
+    
+    const isCorrect = checkCompositeCorrect();
+    setIsAnswered(true);
+    
+    if (isCorrect) {
+      setScore(prev => prev + 1);
+      playSound('correct');
+    } else {
+      setWrongQuestions(prev => [...prev, currentQuestion]);
+      playSound('incorrect');
+    }
+  }, [isAnswered, checkCompositeCorrect, currentQuestion]);
 
   const handleNext = useCallback(() => {
     if (!isAnswered) return;
@@ -115,6 +166,8 @@ export default function BiologyPage() {
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(prev => prev + 1);
       setSelectedAnswer(null);
+      setTfAnswers({});
+      setMatchingAnswers({});
       setIsAnswered(false);
     } else {
       const now = Date.now();
@@ -126,7 +179,7 @@ export default function BiologyPage() {
   // Keyboard controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (mode === 'quiz' && !isAnswered && currentQuestion) {
+      if (mode === 'quiz' && !isAnswered && currentQuestion && currentQuestion.type === 'choice') {
         if (e.key === '1') handleAnswer(currentQuestion.options[0]);
         if (e.key === '2') handleAnswer(currentQuestion.options[1]);
         if (e.key === '3') handleAnswer(currentQuestion.options[2]);
@@ -134,8 +187,17 @@ export default function BiologyPage() {
       }
       
       if (e.key === 'Enter') {
-        if (mode === 'quiz' && isAnswered) {
-          handleNext();
+        if (mode === 'quiz') {
+          if (isAnswered) {
+            handleNext();
+          } else if (currentQuestion && (currentQuestion.type === 'true-false' || currentQuestion.type === 'matching')) {
+            // Check if all answered
+            if (currentQuestion.type === 'true-false' && Object.keys(tfAnswers).length === currentQuestion.statements.length) {
+              handleValidateComposite();
+            } else if (currentQuestion.type === 'matching' && Object.keys(matchingAnswers).length === currentQuestion.pairs.length) {
+              handleValidateComposite();
+            }
+          }
         } else if (mode === 'result') {
           setMode('selection');
         }
@@ -144,7 +206,7 @@ export default function BiologyPage() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [mode, isAnswered, currentQuestion, handleAnswer, handleNext]);
+  }, [mode, isAnswered, currentQuestion, handleAnswer, handleNext, tfAnswers, matchingAnswers, handleValidateComposite]);
 
   return (
     <div className="min-h-screen bg-[#F9FAFB] flex flex-col font-sans">
@@ -161,7 +223,7 @@ export default function BiologyPage() {
         </div>
       </nav>
 
-      <main className="flex-1 flex flex-col items-center justify-center px-6 sm:px-12 py-8 max-w-4xl mx-auto w-full">
+      <main className="flex-1 flex flex-col items-center justify-center px-4 sm:px-12 py-4 sm:py-8 max-w-4xl mx-auto w-full">
         <AnimatePresence mode="wait">
           {mode === 'selection' && (
             <motion.div 
@@ -169,34 +231,34 @@ export default function BiologyPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.05 }}
-              className="w-full space-y-12 text-center"
+              className="w-full space-y-8 sm:space-y-12 text-center"
             >
               <div className="space-y-4">
-                <h1 className="text-4xl font-bold text-slate-900">Môn Sinh Học</h1>
-                <p className="text-slate-500 italic">Hành trình khám phá sự sống</p>
+                <h1 className="text-3xl sm:text-4xl font-bold text-slate-900">Môn Sinh Học</h1>
+                <p className="text-slate-500 italic text-sm">Hành trình khám phá sự sống</p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                 <button 
                   onClick={() => { playSound('click'); setMode('topic-list'); }}
-                  className="group bg-white p-10 rounded-3xl border border-slate-200 shadow-sm hover:border-slate-900 hover:shadow-xl transition-all text-left"
+                  className="group bg-white p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-sm hover:border-slate-900 hover:shadow-xl transition-all text-left"
                 >
-                  <div className="w-14 h-14 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-slate-900 group-hover:text-white transition-all">
-                    <BookOpen size={28} />
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 group-hover:bg-slate-900 group-hover:text-white transition-all">
+                    <BookOpen size={24} />
                   </div>
-                  <h3 className="text-2xl font-bold text-slate-900 mb-2">Theo bài học</h3>
-                  <p className="text-slate-400">Ôn tập tập trung cho Bài 18 (Chu kì tế bào) và Bài 19 (Quá trình phân bào).</p>
+                  <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">Theo bài học</h3>
+                  <p className="text-slate-400 text-sm">Ôn tập tập trung từng bài học cụ thể trong chương trình.</p>
                 </button>
 
                 <button 
                   onClick={handleStartRandom}
-                  className="group bg-white p-10 rounded-3xl border border-slate-200 shadow-sm hover:border-slate-900 hover:shadow-xl transition-all text-left"
+                  className="group bg-white p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-sm hover:border-slate-900 hover:shadow-xl transition-all text-left"
                 >
-                  <div className="w-14 h-14 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-slate-900 group-hover:text-white transition-all">
-                    <Shuffle size={28} />
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 group-hover:bg-slate-900 group-hover:text-white transition-all">
+                    <Shuffle size={24} />
                   </div>
-                  <h3 className="text-2xl font-bold text-slate-900 mb-2">Tổng hợp</h3>
-                  <p className="text-slate-400">Ôn tập ngẫu nhiên tất cả các bài thuộc chương trình học kì 2.</p>
+                  <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">Tổng hợp</h3>
+                  <p className="text-slate-400 text-sm">Ôn tập ngẫu nhiên tất cả các bài đã học để kiểm tra kiến thức tổng quát.</p>
                 </button>
               </div>
             </motion.div>
@@ -208,10 +270,10 @@ export default function BiologyPage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="w-full space-y-8"
+              className="w-full space-y-6 sm:space-y-8"
             >
               <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-bold text-slate-900">Nội dung ôn tập</h2>
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">Nội dung ôn tập</h2>
                 <button 
                   onClick={() => { playSound('click'); setMode('selection'); }}
                   className="text-sm font-medium text-slate-400 hover:text-slate-900 transition-colors"
@@ -220,7 +282,7 @@ export default function BiologyPage() {
                 </button>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {BIOLOGY_DATA.map((topic, index) => (
                   <motion.button
                     key={topic.id}
@@ -228,13 +290,13 @@ export default function BiologyPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                     onClick={() => handleSelectTopic(topic)}
-                    className="w-full p-6 text-left bg-white border border-slate-100 rounded-2xl hover:border-slate-900 transition-all flex items-center justify-between group shadow-sm hover:shadow-md"
+                    className="w-full p-4 sm:p-6 text-left bg-white border border-slate-100 rounded-2xl hover:border-slate-900 transition-all flex items-center justify-between group shadow-sm hover:shadow-md"
                   >
                     <div className="space-y-1">
-                      <h4 className="text-lg font-bold text-slate-900 group-hover:translate-x-1 transition-transform">{topic.title}</h4>
-                      <p className="text-xs text-slate-400">{topic.questions.length} câu hỏi</p>
+                      <h4 className="text-base sm:text-lg font-bold text-slate-900 group-hover:translate-x-1 transition-transform">{topic.title}</h4>
+                      <p className="text-[10px] text-slate-400">{topic.questions.length} câu hỏi</p>
                     </div>
-                    <ArrowRight className="text-slate-200 group-hover:text-slate-900 transition-colors" />
+                    <ArrowRight className="text-slate-200 group-hover:text-slate-900 transition-colors shrink-0 ml-4" size={20} />
                   </motion.button>
                 ))}
               </div>
@@ -247,10 +309,10 @@ export default function BiologyPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="w-full max-w-2xl space-y-8"
+              className="w-full max-w-2xl space-y-6 sm:space-y-8"
             >
               <div className="space-y-2">
-                <div className="flex justify-between text-xs font-bold text-slate-400 uppercase tracking-widest">
+                <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                   <span>Câu hỏi {currentIndex + 1} / {questions.length}</span>
                   <span>Đúng: {score}</span>
                 </div>
@@ -263,65 +325,179 @@ export default function BiologyPage() {
                 </div>
               </div>
 
-              <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
-                <h2 className="text-2xl font-bold text-slate-900 leading-tight">
+              <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-sm">
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-900 leading-tight">
                   {currentQuestion.question}
                 </h2>
               </div>
 
-              <div className="grid grid-cols-1 gap-3">
-                {currentQuestion.options.map((option, idx) => {
-                  const isCorrectResult = isAnswered && option === currentQuestion.answer;
-                  const isWrongResult = isAnswered && selectedAnswer === option && option !== currentQuestion.answer;
-                  
-                  return (
-                    <motion.button
-                      key={idx}
-                      whileTap={{ scale: 0.99 }}
-                      onClick={() => handleAnswer(option)}
-                      disabled={isAnswered}
+              {/* Question Type: Multiple Choice */}
+              {currentQuestion.type === 'choice' && (
+                <div className="grid grid-cols-1 gap-2 sm:gap-3">
+                  {currentQuestion.options.map((option, idx) => {
+                    const isCorrectResult = isAnswered && option === currentQuestion.answer;
+                    const isWrongResult = isAnswered && selectedAnswer === option && option !== currentQuestion.answer;
+                    
+                    return (
+                      <motion.button
+                        key={idx}
+                        whileTap={{ scale: 0.99 }}
+                        onClick={() => handleAnswer(option)}
+                        disabled={isAnswered}
+                        className={cn(
+                          "p-4 sm:p-5 rounded-2xl border-2 text-left transition-all relative flex items-center justify-between group min-h-[64px]",
+                          !isAnswered && "border-slate-100 hover:border-slate-900 bg-white",
+                          isAnswered && option === currentQuestion.answer && "border-green-500 bg-green-50 text-green-900",
+                          isAnswered && selectedAnswer === option && option !== currentQuestion.answer && "border-red-500 bg-red-50 text-red-900",
+                          isAnswered && selectedAnswer !== option && option !== currentQuestion.answer && "border-slate-50 bg-white opacity-50"
+                        )}
+                      >
+                        <div className="flex items-center gap-3 sm:gap-4 flex-1">
+                          <span className={cn(
+                            "w-7 h-7 sm:w-8 sm:h-8 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold transition-colors",
+                            !isAnswered && "bg-slate-50 text-slate-400 group-hover:bg-slate-900 group-hover:text-white",
+                            isCorrectResult && "bg-green-500 text-white",
+                            isWrongResult && "bg-red-500 text-white",
+                            isAnswered && !isCorrectResult && !isWrongResult && "bg-slate-100 text-slate-300"
+                          )}>
+                            {idx + 1}
+                          </span>
+                          <span className="font-medium text-sm sm:text-base leading-snug">{option}</span>
+                        </div>
+                        
+                        {isCorrectResult && <CheckCircle2 className="text-green-500 shrink-0" size={18} />}
+                        {isWrongResult && <XCircle className="text-red-500 shrink-0" size={18} />}
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Question Type: True/False */}
+              {currentQuestion.type === 'true-false' && (
+                <div className="space-y-4">
+                  {currentQuestion.statements.map((statement, idx) => (
+                    <div key={statement.id} className="bg-white p-4 rounded-2xl border border-slate-100 space-y-3">
+                      <p className="text-sm font-medium leading-relaxed">
+                        <span className="font-bold mr-2">{statement.id}.</span>
+                        {statement.text}
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          disabled={isAnswered}
+                          onClick={() => handleTFAnswer(statement.id, true)}
+                          className={cn(
+                            "flex-1 py-2 rounded-xl border-2 font-bold text-xs transition-all",
+                            tfAnswers[statement.id] === true && !isAnswered && "border-slate-900 bg-slate-900 text-white",
+                            tfAnswers[statement.id] !== true && !isAnswered && "border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-200",
+                            isAnswered && statement.answer === true && "border-green-500 bg-green-500 text-white",
+                            isAnswered && tfAnswers[statement.id] === true && statement.answer !== true && "border-red-500 bg-red-500 text-white",
+                            isAnswered && statement.answer !== true && tfAnswers[statement.id] !== true && "border-slate-100 bg-slate-50 text-slate-200"
+                          )}
+                        >
+                          ĐÚNG
+                        </button>
+                        <button
+                          disabled={isAnswered}
+                          onClick={() => handleTFAnswer(statement.id, false)}
+                          className={cn(
+                            "flex-1 py-2 rounded-xl border-2 font-bold text-xs transition-all",
+                            tfAnswers[statement.id] === false && !isAnswered && "border-slate-900 bg-slate-900 text-white",
+                            tfAnswers[statement.id] !== false && !isAnswered && "border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-200",
+                            isAnswered && statement.answer === false && "border-green-500 bg-green-500 text-white",
+                            isAnswered && tfAnswers[statement.id] === false && statement.answer !== false && "border-red-500 bg-red-500 text-white",
+                            isAnswered && statement.answer !== false && tfAnswers[statement.id] !== false && "border-slate-100 bg-slate-50 text-slate-200"
+                          )}
+                        >
+                          SAI
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {!isAnswered && (
+                    <button
+                      onClick={handleValidateComposite}
+                      disabled={Object.keys(tfAnswers).length < currentQuestion.statements.length}
                       className={cn(
-                        "p-5 rounded-2xl border-2 text-left transition-all relative flex items-center justify-between group",
-                        !isAnswered && "border-slate-100 hover:border-slate-900 bg-white",
-                        isAnswered && option === currentQuestion.answer && "border-green-500 bg-green-50 text-green-900",
-                        isAnswered && selectedAnswer === option && option !== currentQuestion.answer && "border-red-500 bg-red-50 text-red-900",
-                        isAnswered && selectedAnswer !== option && option !== currentQuestion.answer && "border-slate-50 bg-white opacity-50"
+                        "w-full py-4 rounded-2xl font-bold text-sm transition-all shadow-lg active:scale-[0.98]",
+                        Object.keys(tfAnswers).length === currentQuestion.statements.length 
+                          ? "bg-slate-900 text-white hover:bg-slate-800" 
+                          : "bg-slate-100 text-slate-300 cursor-not-allowed"
                       )}
                     >
-                      <div className="flex items-center gap-4">
-                        <span className={cn(
-                          "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors",
-                          !isAnswered && "bg-slate-50 text-slate-400 group-hover:bg-slate-900 group-hover:text-white",
-                          isCorrectResult && "bg-green-500 text-white",
-                          isWrongResult && "bg-red-500 text-white",
-                          isAnswered && !isCorrectResult && !isWrongResult && "bg-slate-100 text-slate-300"
-                        )}>
-                          {idx + 1}
-                        </span>
-                        <span className="font-medium">{option}</span>
-                      </div>
-                      
-                      {isCorrectResult && <CheckCircle2 className="text-green-500" size={20} />}
-                      {isWrongResult && <XCircle className="text-red-500" size={20} />}
-                    </motion.button>
-                  );
-                })}
-              </div>
+                      KIỂM TRA ĐÁP ÁN
+                    </button>
+                  )}
+                </div>
+              )}
 
-              <div className="flex justify-between items-center text-slate-400 text-xs font-medium italic">
-                <div className="flex gap-4">
-                  <span>Dùng phím 1-4 để chọn</span>
-                  <span>Enter để tiếp tục</span>
+              {/* Question Type: Matching */}
+              {currentQuestion.type === 'matching' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 gap-4">
+                    {currentQuestion.pairs.map((pair, idx) => (
+                      <div key={idx} className="flex flex-col sm:flex-row gap-2">
+                        <div className="bg-slate-900 text-white p-4 rounded-xl flex-1 flex items-center justify-center font-bold text-sm">
+                          {pair.left}
+                        </div>
+                        <div className="hidden sm:flex items-center text-slate-200">
+                          <ArrowRight size={24} />
+                        </div>
+                        <div className="flex-[2] relative">
+                          <select
+                            disabled={isAnswered}
+                            value={matchingAnswers[pair.left] || ''}
+                            onChange={(e) => handleMatchingAnswer(pair.left, e.target.value)}
+                            className={cn(
+                              "w-full p-4 rounded-xl border-2 font-medium text-sm appearance-none bg-white",
+                              !isAnswered && "border-slate-100 hover:border-slate-900",
+                              isAnswered && matchingAnswers[pair.left] === pair.right && "border-green-500 bg-green-50 text-green-900 opacity-100",
+                              isAnswered && matchingAnswers[pair.left] !== pair.right && "border-red-500 bg-red-50 text-red-900 opacity-100"
+                            )}
+                          >
+                            <option value="">Chọn đáp án...</option>
+                            {currentQuestion.pairs.map(p => (
+                              <option key={p.right} value={p.right}>{p.right}</option>
+                            ))}
+                          </select>
+                          {isAnswered && matchingAnswers[pair.left] !== pair.right && (
+                            <p className="text-[10px] text-red-500 mt-1 font-bold">Đáp án đúng: {pair.right}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {!isAnswered && (
+                    <button
+                      onClick={handleValidateComposite}
+                      disabled={Object.keys(matchingAnswers).length < currentQuestion.pairs.length}
+                      className={cn(
+                        "w-full py-4 rounded-2xl font-bold text-sm transition-all shadow-lg active:scale-[0.98]",
+                        Object.keys(matchingAnswers).length === currentQuestion.pairs.length 
+                          ? "bg-slate-900 text-white hover:bg-slate-800" 
+                          : "bg-slate-100 text-slate-300 cursor-not-allowed"
+                      )}
+                    >
+                      KIỂM TRA ĐÁP ÁN
+                    </button>
+                  )}
+                </div>
+              )}
+
+              <div className="flex justify-between items-center text-slate-400 text-[10px] font-medium italic">
+                <div className="flex flex-col sm:flex-row gap-1 sm:gap-4">
+                  {currentQuestion.type === 'choice' && <span>Dùng phím 1-4 để chọn</span>}
+                  <span className="hidden sm:inline">Enter để tiếp tục</span>
                 </div>
                 {isAnswered && (
                   <motion.button
                     initial={{ opacity: 0, x: 10 }}
                     animate={{ opacity: 1, x: 0 }}
                     onClick={handleNext}
-                    className="flex items-center gap-2 text-slate-900 font-bold not-italic"
+                    className="flex items-center gap-2 text-slate-900 font-bold not-italic group"
                   >
-                    {currentIndex === questions.length - 1 ? 'Xem kết quả' : 'Câu tiếp theo'}
-                    <ArrowRight size={16} />
+                    <span className="text-xs">{currentIndex === questions.length - 1 ? 'Xem kết quả' : 'Câu tiếp theo'}</span>
+                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                   </motion.button>
                 )}
               </div>
@@ -333,41 +509,53 @@ export default function BiologyPage() {
               key="result"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="w-full max-w-lg space-y-12 text-center"
+              className="w-full max-w-lg space-y-8 sm:space-y-12 text-center"
             >
               <div className="space-y-6">
-                <div className="inline-block p-6 rounded-full bg-green-600 text-white mb-4">
-                  <CheckCircle2 size={48} />
+                <div className="inline-block p-4 sm:p-6 rounded-full bg-green-600 text-white mb-2 underline-none">
+                  <CheckCircle2 size={40} className="sm:w-[48px] sm:h-[48px]" />
                 </div>
-                <h1 className="text-4xl font-bold text-slate-900 uppercase tracking-tighter">Hoàn thành!</h1>
-                <div className="flex justify-center gap-12">
+                <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 uppercase tracking-tighter">Hoàn thành!</h1>
+                <div className="flex justify-center gap-8 sm:gap-12">
                   <div className="space-y-1">
-                    <p className="text-5xl font-black text-slate-900">{score}/{questions.length}</p>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Điểm số</p>
+                    <p className="text-4xl sm:text-5xl font-black text-slate-900">{score}/{questions.length}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Điểm số</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-5xl font-black text-slate-900">{Math.round((score / questions.length) * 100)}%</p>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Độ chính xác</p>
+                    <p className="text-4xl sm:text-5xl font-black text-slate-900">{Math.round((score / questions.length) * 100)}%</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Độ chính xác</p>
                   </div>
                 </div>
-                <p className="text-slate-400 text-sm italic">Thời gian hoàn thành: {quizDuration} giây</p>
+                <p className="text-slate-400 text-xs italic">Thời gian hoàn thành: {quizDuration} giây</p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <button 
-                  onClick={() => { playSound('click'); setMode('selection'); }}
-                  className="flex items-center justify-center gap-3 py-5 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all active:scale-95 shadow-lg"
+              <div className="flex flex-col gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button 
+                  onClick={() => handleStartRandom()}
+                  className="flex items-center justify-center gap-3 py-4 sm:py-5 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all active:scale-95 shadow-lg text-sm sm:text-base"
                 >
-                  <RotateCcw size={20} />
-                  ÔN LẠI
+                  <RotateCcw size={18} />
+                  ÔN LẠI TỪ ĐẦU
                 </button>
                 <Link 
                   href="/"
-                  className="flex items-center justify-center gap-3 py-5 bg-white text-slate-900 border border-slate-200 rounded-2xl font-bold hover:border-slate-900 transition-all active:scale-95"
+                  className="flex items-center justify-center gap-3 py-4 sm:py-5 bg-white text-slate-900 border border-slate-200 rounded-2xl font-bold hover:border-slate-900 transition-all active:scale-95 text-sm sm:text-base"
                 >
-                  <Home size={20} />
+                  <Home size={18} />
                   VỀ TRANG CHỦ
                 </Link>
+                </div>
+                
+                {wrongQuestions.length > 0 && (
+                  <button 
+                  onClick={handleReviewWrong}
+                  className="flex items-center justify-center gap-3 py-4 sm:py-5 bg-red-50 text-red-600 border border-red-100 rounded-2xl font-bold hover:bg-red-100 transition-all active:scale-95 text-sm sm:text-base"
+                >
+                  <BookOpen size={18} />
+                  ÔN LẠI CÂU SAI ({wrongQuestions.length})
+                </button>
+                )}
               </div>
             </motion.div>
           )}
