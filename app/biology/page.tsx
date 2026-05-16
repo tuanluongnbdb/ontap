@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ArrowLeft, 
@@ -14,10 +14,12 @@ import {
   Lock
 } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { BIOLOGY_DATA, Question, Topic } from '@/lib/biology-data';
+import { BIOLOGY_DATA, ENGLISH_DATA, Question, Topic } from '@/lib/quiz-data';
 
-type QuizMode = 'selection' | 'topic-list' | 'quiz' | 'result';
+type Subject = 'biology' | 'english';
+type QuizMode = 'subject-selection' | 'selection' | 'topic-list' | 'quiz' | 'result';
 
 // Simple sound utility using Web Audio API
 const playSound = (type: 'correct' | 'incorrect' | 'click') => {
@@ -55,8 +57,12 @@ const playSound = (type: 'correct' | 'incorrect' | 'click') => {
   }
 };
 
-export default function BiologyPage() {
-  const [mode, setMode] = useState<QuizMode>('selection');
+function QuizContent() {
+  const searchParams = useSearchParams();
+  const initialSub = searchParams.get('sub') as Subject;
+  
+  const [mode, setMode] = useState<QuizMode>(initialSub ? 'selection' : 'subject-selection');
+  const [subject, setSubject] = useState<Subject>(initialSub || 'biology');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [wrongQuestions, setWrongQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -64,9 +70,12 @@ export default function BiologyPage() {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [tfAnswers, setTfAnswers] = useState<Record<string, boolean | null>>({});
   const [matchingAnswers, setMatchingAnswers] = useState<Record<string, string>>({});
+  const [inputAnswer, setInputAnswer] = useState<string>('');
   const [isAnswered, setIsAnswered] = useState(false);
   const [quizStartTime, setQuizStartTime] = useState<number>(0);
   const [quizDuration, setQuizDuration] = useState<number>(0);
+
+  const currentTopicData = subject === 'biology' ? BIOLOGY_DATA : ENGLISH_DATA;
 
   const currentQuestion = questions[currentIndex];
 
@@ -79,6 +88,7 @@ export default function BiologyPage() {
     setSelectedAnswer(null);
     setTfAnswers({});
     setMatchingAnswers({});
+    setInputAnswer('');
     setIsAnswered(false);
     const now = Date.now();
     setQuizStartTime(now);
@@ -86,7 +96,7 @@ export default function BiologyPage() {
 
   const handleStartRandom = () => {
     playSound('click');
-    const allQuestions = BIOLOGY_DATA.flatMap(topic => topic.questions);
+    const allQuestions = currentTopicData.flatMap(topic => topic.questions);
     const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
     startQuiz(shuffled);
   };
@@ -114,8 +124,24 @@ export default function BiologyPage() {
     if (currentQuestion.type === 'matching') {
       return currentQuestion.pairs.every(p => matchingAnswers[p.left] === p.right);
     }
+    if (currentQuestion.type === 'input') {
+      // Forgiving normalization: lowercase, trim, normalize internal whitespace, remove common punctuation
+      const normalize = (s: string) => s
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, ' ') // Replace multiple spaces/newlines with single space
+        .replace(/[.,!?;:]/g, '') // Remove most punctuation for flexible comparison
+        .trim();
+        
+      const userAns = normalize(inputAnswer);
+      
+      if (Array.isArray(currentQuestion.answer)) {
+        return currentQuestion.answer.some(ans => normalize(ans) === userAns);
+      }
+      return userAns === normalize(currentQuestion.answer as string);
+    }
     return false;
-  }, [currentQuestion, selectedAnswer, tfAnswers, matchingAnswers]);
+  }, [currentQuestion, selectedAnswer, tfAnswers, matchingAnswers, inputAnswer]);
 
   const handleAnswer = useCallback((option: string) => {
     if (isAnswered || !currentQuestion || currentQuestion.type !== 'choice') return;
@@ -168,6 +194,7 @@ export default function BiologyPage() {
       setSelectedAnswer(null);
       setTfAnswers({});
       setMatchingAnswers({});
+      setInputAnswer('');
       setIsAnswered(false);
     } else {
       const now = Date.now();
@@ -225,17 +252,66 @@ export default function BiologyPage() {
 
       <main className="flex-1 flex flex-col items-center justify-center px-4 sm:px-12 py-4 sm:py-8 max-w-4xl mx-auto w-full">
         <AnimatePresence mode="wait">
-          {mode === 'selection' && (
+          {mode === 'subject-selection' && (
             <motion.div 
-              key="selection"
+              key="subject-selection"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.05 }}
               className="w-full space-y-8 sm:space-y-12 text-center"
             >
               <div className="space-y-4">
-                <h1 className="text-3xl sm:text-4xl font-bold text-slate-900">Môn Sinh Học</h1>
-                <p className="text-slate-500 italic text-sm">Hành trình khám phá sự sống</p>
+                <h1 className="text-3xl sm:text-4xl font-bold text-slate-900">Chọn môn học</h1>
+                <p className="text-slate-500 italic text-sm">Bắt đầu hành trình chinh phục kiến thức</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
+                <button 
+                  onClick={() => { playSound('click'); setSubject('biology'); setMode('selection'); }}
+                  className="group bg-white p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-sm hover:border-slate-900 hover:shadow-xl transition-all text-left"
+                >
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 group-hover:bg-slate-900 group-hover:text-white transition-all text-2xl font-bold">
+                    B
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">Sinh học</h3>
+                  <p className="text-slate-400 text-sm">Khám phá chu kì tế bào, vi sinh vật và virus.</p>
+                </button>
+
+                <button 
+                  onClick={() => { playSound('click'); setSubject('english'); setMode('selection'); }}
+                  className="group bg-white p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-sm hover:border-slate-900 hover:shadow-xl transition-all text-left"
+                >
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 group-hover:bg-slate-900 group-hover:text-white transition-all text-2xl font-bold">
+                    E
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">Tiếng Anh</h3>
+                  <p className="text-slate-400 text-sm">Luyện tập từ vựng, ngữ pháp và kỹ năng viết.</p>
+                </button>
+              </div>
+            </motion.div>
+          )}
+
+          {mode === 'selection' && (
+            <motion.div 
+              key="selection"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="w-full space-y-8 sm:space-y-12 text-center"
+            >
+              <div className="space-y-2">
+                <button 
+                  onClick={() => setMode('subject-selection')}
+                  className="text-xs font-bold text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-widest flex items-center justify-center gap-2 mx-auto mb-4"
+                >
+                  <ArrowLeft size={12} /> Thay đổi môn học
+                </button>
+                <h1 className="text-3xl sm:text-4xl font-bold text-slate-900">
+                  Môn {subject === 'biology' ? 'Sinh Học' : 'Tiếng Anh'}
+                </h1>
+                <p className="text-slate-500 italic text-sm">
+                  {subject === 'biology' ? 'Hành trình khám phá sự sống' : 'Nâng cao trình độ ngoại ngữ'}
+                </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
@@ -283,7 +359,7 @@ export default function BiologyPage() {
               </div>
 
               <div className="space-y-3 sm:space-y-4">
-                {BIOLOGY_DATA.map((topic, index) => (
+                {currentTopicData.map((topic, index) => (
                   <motion.button
                     key={topic.id}
                     initial={{ opacity: 0, y: 10 }}
@@ -484,6 +560,73 @@ export default function BiologyPage() {
                 </div>
               )}
 
+              {/* Question Type: Input (Writing) */}
+              {currentQuestion.type === 'input' && (
+                <div className="space-y-6">
+                  {currentQuestion.hint && (
+                    <p className="text-xs font-medium text-slate-400 bg-slate-50 p-3 rounded-xl border border-dashed border-slate-200">
+                      <span className="font-bold text-slate-900 mr-2">Gợi ý:</span>
+                      {currentQuestion.hint}
+                    </p>
+                  )}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Câu trả lời của bạn</label>
+                    <textarea 
+                      autoFocus
+                      disabled={isAnswered}
+                      value={inputAnswer}
+                      onChange={(e) => setInputAnswer(e.target.value)}
+                      placeholder="Nhập câu trả lời tại đây..."
+                      className={cn(
+                        "w-full p-6 rounded-2xl border-2 font-medium text-base min-h-[140px] transition-all resize-none",
+                        !isAnswered && "border-slate-100 focus:border-slate-900 bg-white shadow-inner",
+                        isAnswered && checkCompositeCorrect() && "border-green-500 bg-green-50 text-green-900",
+                        isAnswered && !checkCompositeCorrect() && "border-red-500 bg-red-50 text-red-900"
+                      )}
+                    />
+                  </div>
+                  
+                  <AnimatePresence>
+                    {isAnswered && !checkCompositeCorrect() && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-5 rounded-2xl bg-slate-900 text-white space-y-2"
+                      >
+                        <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400">Đáp án chính xác gợi ý</p>
+                        <div className="space-y-1">
+                          {Array.isArray(currentQuestion.answer) ? (
+                            currentQuestion.answer.slice(0, 3).map((ans, i) => (
+                              <p key={i} className="text-sm font-medium leading-relaxed">• {ans}</p>
+                            ))
+                          ) : (
+                            <p className="text-sm font-medium leading-relaxed">{currentQuestion.answer}</p>
+                          )}
+                          {Array.isArray(currentQuestion.answer) && currentQuestion.answer.length > 3 && (
+                            <p className="text-[10px] text-slate-400 italic">... và {currentQuestion.answer.length - 3} biến thể khác</p>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {!isAnswered && (
+                    <button
+                      onClick={handleValidateComposite}
+                      disabled={!inputAnswer.trim()}
+                      className={cn(
+                        "w-full py-5 rounded-2xl font-bold text-sm transition-all shadow-lg active:scale-[0.98]",
+                        inputAnswer.trim()
+                          ? "bg-slate-900 text-white hover:bg-slate-800" 
+                          : "bg-slate-100 text-slate-300 cursor-not-allowed"
+                      )}
+                    >
+                      KIỂM TRA ĐÁP ÁN
+                    </button>
+                  )}
+                </div>
+              )}
+
               <div className="flex justify-between items-center text-slate-400 text-[10px] font-medium italic">
                 <div className="flex flex-col sm:flex-row gap-1 sm:gap-4">
                   {currentQuestion.type === 'choice' && <span>Dùng phím 1-4 để chọn</span>}
@@ -568,8 +711,25 @@ export default function BiologyPage() {
            <div className="w-1.5 h-1.5 rounded-full bg-slate-100"></div>
            <div className="w-1.5 h-1.5 rounded-full bg-slate-100"></div>
         </div>
-        <span className="text-[10px] font-mono uppercase tracking-[0.2em]">{mode.toUpperCase()} _ MODULE // BIOLOGY</span>
+        <span className="text-[10px] font-mono uppercase tracking-[0.2em]">
+          {mode.toUpperCase()} _ MODULE // {subject.toUpperCase()}
+        </span>
       </footer>
     </div>
+  );
+}
+
+export default function QuizPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center font-sans uppercase-none">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-slate-900 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-slate-500 font-medium font-bold uppercase tracking-widest text-xs">Đang tải dữ liệu...</p>
+        </div>
+      </div>
+    }>
+      <QuizContent />
+    </Suspense>
   );
 }

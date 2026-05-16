@@ -1,4 +1,4 @@
-export type QuestionType = 'choice' | 'true-false' | 'matching';
+export type QuestionType = 'choice' | 'true-false' | 'matching' | 'input';
 
 export interface BaseQuestion {
   id: number;
@@ -10,6 +10,12 @@ export interface ChoiceQuestion extends BaseQuestion {
   type: 'choice';
   options: string[];
   answer: string;
+}
+
+export interface InputQuestion extends BaseQuestion {
+  type: 'input';
+  answer: string | string[];
+  hint?: string;
 }
 
 export interface TrueFalseStatement {
@@ -33,7 +39,7 @@ export interface MatchingQuestion extends BaseQuestion {
   pairs: MatchingPair[];
 }
 
-export type Question = ChoiceQuestion | TrueFalseQuestion | MatchingQuestion;
+export type Question = ChoiceQuestion | TrueFalseQuestion | MatchingQuestion | InputQuestion;
 
 export interface Topic {
   id: string;
@@ -1153,6 +1159,685 @@ export const BIOLOGY_DATA: Topic[] = [
           { id: 'c', text: 'Virus này gây ra các bệnh nguy hiểm về hệ miễn dịch.', answer: false },
           { id: 'd', text: 'Vật trung gian truyền bệnh là gia cầm, gia súc.', answer: true }
         ]
+      }
+    ]
+  }
+];
+
+export const ENGLISH_DATA: Topic[] = [
+  {
+    id: 'en-vocab',
+    title: 'English: Vocabulary',
+    questions: [
+      {
+        id: 1,
+        type: 'choice',
+        question: "Lack of an education limits women's access _____ information and opportunities.",
+        options: ['to', 'with', 'about', 'from'],
+        answer: 'to'
+      },
+      {
+        id: 2,
+        type: 'choice',
+        question: '_____ involves making sure that boys and girls have the same chances to learn and grow.',
+        options: ['Job opportunity', 'Gender equality', 'Gender role', 'Physical strength'],
+        answer: 'Gender equality'
+      },
+      {
+        id: 3,
+        type: 'choice',
+        question: 'In the past, women were kept at home, limiting their opportunities and _____.',
+        options: ['risks', 'pressure', 'fitness', 'rights'],
+        answer: 'rights'
+      },
+      {
+        id: 4,
+        type: 'choice',
+        question: 'In _____ learning, students may have class discussions, take online tests and submit homework online.',
+        options: ['normal', 'blended', 'traditional', 'face-to-face'],
+        answer: 'blended'
+      },
+      {
+        id: 5,
+        type: 'choice',
+        question: 'ASEAN is a regional organization that _____ to promote economic and security cooperation among its members.',
+        options: ['creates', 'aims', 'develops', 'promotes'],
+        answer: 'aims'
+      },
+      {
+        id: 6,
+        type: 'choice',
+        question: 'Foreign companies in Vietnam try to make products of higher quality at _____ prices.',
+        options: ['essential', 'practical', 'active', 'competitive'],
+        answer: 'competitive'
+      },
+      {
+        id: 7,
+        type: 'choice',
+        question: 'Online education offers access for students facing geospatial barriers to traditional _____.',
+        options: ['schedules', 'lessons', 'materials', 'classrooms'],
+        answer: 'classrooms'
+      },
+      {
+        id: 8,
+        type: 'choice',
+        question: 'Social _____ is the way students interact with each other, with their teachers, the environment they study in, and their materials.',
+        options: ['instruction', 'distraction', 'interaction', 'communication'],
+        answer: 'interaction'
+      },
+      {
+        id: 9,
+        type: 'choice',
+        question: 'We are often asked to _____ for short presentations in class.',
+        options: ['choose', 'prepare', 'watch', 'discuss'],
+        answer: 'prepare'
+      },
+      {
+        id: 10,
+        type: 'choice',
+        question: 'Air pollution is mainly caused by waste gases that _____ out of vehicles, machines, or factories.',
+        options: ['come', 'lead', 'produce', 'run'],
+        answer: 'come'
+      },
+      {
+        id: 11,
+        type: 'choice',
+        question: 'The ice _____ in the Arctic sea region is a serious problem, and there are many dangers and risks associated with this.',
+        options: ['flooding', 'burning', 'melting', 'rising'],
+        answer: 'melting'
+      },
+      {
+        id: 12,
+        type: 'choice',
+        question: 'Animals should be kept in their natural _____.',
+        options: ['forests', 'areas', 'habitats', 'lands'],
+        answer: 'habitats'
+      },
+      {
+        id: 13,
+        type: 'choice',
+        question: 'There are many places for tourists to _____ the island.',
+        options: ['explore', 'explain', 'explode', 'expand'],
+        answer: 'explore'
+      },
+      {
+        id: 14,
+        type: 'choice',
+        question: '_____ people are very friendly and welcoming to tourists.',
+        options: ['Home', 'Inside', 'Foreign', 'Local'],
+        answer: 'Local'
+      },
+      {
+        id: 15,
+        type: 'choice',
+        question: '_____ tourism has a negative impact on the environment.',
+        options: ['Mass', 'Massive', 'Eco-', 'Eco-friendly'],
+        answer: 'Mass'
+      },
+      {
+        id: 16,
+        type: 'choice',
+        question: 'Using digital devices in class can help students improve their _____ experience in many ways.',
+        options: ['education', 'educational', 'educationally', 'educator'],
+        answer: 'educational'
+      },
+      {
+        id: 17,
+        type: 'choice',
+        question: 'The United Nations is an example of an international organization focused on _____.',
+        options: ['growth level', 'member countries', 'peacekeeping activities', 'technical support'],
+        answer: 'peacekeeping activities'
+      },
+      {
+        id: 18,
+        type: 'choice',
+        question: 'There are many things for tourists to _____ on the island.',
+        options: ['explore', 'explain', 'explode', 'expand'],
+        answer: 'explore'
+      },
+      {
+        id: 19,
+        type: 'choice',
+        question: '_____ tourism has a lot of negative impact on the environment.',
+        options: ['Mass', 'Safe', 'Eco-', 'Eco-friendly'],
+        answer: 'Mass'
+      },
+      {
+        id: 20,
+        type: 'choice',
+        question: 'Ecotourists respect the local _____ by following the customs and traditions of the places they visit.',
+        options: ['businesses', 'cultures', 'education', 'environment'],
+        answer: 'cultures'
+      },
+      {
+        id: 21,
+        type: 'choice',
+        question: '_____ learning combines classroom methods and e-lessons for diverse education.',
+        options: ['Online', 'Traditional', 'Blended', 'Group'],
+        answer: 'Blended'
+      },
+      {
+        id: 22,
+        type: 'choice',
+        question: 'The _____ of a species depends on its ability to adapt to changes in its environment.',
+        options: ['aspect', 'identification', 'movements', 'survival'],
+        answer: 'survival'
+      },
+      {
+        id: 23,
+        type: 'choice',
+        question: 'Tourists are encouraged not to throw any _____ during their hikes, which makes the environment cleaner.',
+        options: ['wetsuit', 'herb', 'litter', 'scenery'],
+        answer: 'litter'
+      },
+      {
+        id: 24,
+        type: 'choice',
+        question: 'Visiting Cai Be _____ Market helps you explore the daily life of the people on Tien River.',
+        options: ['Floating', 'Walking', 'Diving', 'Swimming'],
+        answer: 'Floating'
+      }
+    ]
+  },
+  {
+    id: 'en-grammar',
+    title: 'English: Grammar',
+    questions: [
+      {
+        id: 1,
+        type: 'choice',
+        question: 'Action to stop domestic violence must _____ immediately.',
+        options: ['take', 'took', 'be taken', 'be taking'],
+        answer: 'be taken'
+      },
+      {
+        id: 2,
+        type: 'choice',
+        question: 'Assignment could _____ on the school platform.',
+        options: ['uploaded', 'be uploaded', 'be uploading', 'upload'],
+        answer: 'be uploaded'
+      },
+      {
+        id: 3,
+        type: 'choice',
+        question: 'Girls _____ to get married before the age of 18.',
+        options: ['should force', 'shouldn\'t force', 'should be forced', 'shouldn\'t be forced'],
+        answer: 'shouldn\'t be forced'
+      },
+      {
+        id: 4,
+        type: 'choice',
+        question: 'Landmark 81 is _____ building in HCM city.',
+        options: ['higher', 'higher than', 'highest', 'the highest'],
+        answer: 'the highest'
+      },
+      {
+        id: 5,
+        type: 'choice',
+        question: 'The weather in the UK in the autumn is _____ the weather in Iceland.',
+        options: ['warmer', 'warmer than', 'warmest', 'the warmest'],
+        answer: 'warmer than'
+      },
+      {
+        id: 6,
+        type: 'choice',
+        question: 'This is _____ film I have ever seen.',
+        options: ['the most exciting', 'more exciting', 'most exciting', 'exciting than'],
+        answer: 'the most exciting'
+      },
+      {
+        id: 7,
+        type: 'choice',
+        question: 'Today, our country is _____ active on the international stage than it was in the past.',
+        options: ['the most', 'the more', 'more', 'most'],
+        answer: 'more'
+      },
+      {
+        id: 8,
+        type: 'choice',
+        question: 'My friend _____ visited my class last week, is a famous singer.',
+        options: ['who', 'which', 'that', 'whom'],
+        answer: 'who'
+      },
+      {
+        id: 9,
+        type: 'choice',
+        question: 'My car, _____ I bought last week, is eco-friendly.',
+        options: ['that', 'which', 'who', 'whom'],
+        answer: 'which'
+      },
+      {
+        id: 10,
+        type: 'choice',
+        question: 'He is the man _____ sister is a vegetarian.',
+        options: ['who', 'which', 'whose', 'that'],
+        answer: 'whose'
+      },
+      {
+        id: 11,
+        type: 'choice',
+        question: 'This is the greenhouse _____ they built last month.',
+        options: ['who', 'which', 'whose', 'that'],
+        answer: 'that'
+      },
+      {
+        id: 12,
+        type: 'choice',
+        question: 'My mother, _____ everyone admires, is a famous teacher.',
+        options: ['where', 'whom', 'which', 'whose'],
+        answer: 'whom'
+      },
+      {
+        id: 13,
+        type: 'choice',
+        question: 'The old building _____ is in front of my house fell down.',
+        options: ['of which', 'which', 'whose', 'whom'],
+        answer: 'which'
+      },
+      {
+        id: 14,
+        type: 'choice',
+        question: 'Tom _____ that his mother was in hospital.',
+        options: ['told me', 'told to me', 'said me', 'asked me'],
+        answer: 'told me'
+      },
+      {
+        id: 15,
+        type: 'choice',
+        question: 'Mai asked Quang _____.',
+        options: ['when he will come back', 'when he would come back', 'when he comes back', 'when he is coming back'],
+        answer: 'when he would come back'
+      },
+      {
+        id: 16,
+        type: 'choice',
+        question: 'She told me that she _____ to me the Sunday before.',
+        options: ['wrote', 'has written', 'was writing', 'had written'],
+        answer: 'had written'
+      },
+      {
+        id: 17,
+        type: 'choice',
+        question: 'Helen asked me _____ I would go to the cinema with her the following week.',
+        options: ['if', 'where', 'when', 'what'],
+        answer: 'if'
+      },
+      {
+        id: 18,
+        type: 'choice',
+        question: 'They said that they had driven through the desert _____.',
+        options: ['the previous day', 'tonight', 'today', 'the following day'],
+        answer: 'the previous day'
+      },
+      {
+        id: 19,
+        type: 'choice',
+        question: 'If you _____ a choice, which country would you visit?',
+        options: ['have', 'had', 'have had', 'will have'],
+        answer: 'had'
+      },
+      {
+        id: 20,
+        type: 'choice',
+        question: 'If you _____ to be chosen for the job, you\'ll have to be experienced in the field.',
+        options: ['want', 'wanted', 'have had', 'will have'],
+        answer: 'want'
+      },
+      {
+        id: 21,
+        type: 'choice',
+        question: 'You will become ill if you _____ working long hours every day.',
+        options: ['keep', 'will keep', 'kept', 'would keep'],
+        answer: 'keep'
+      },
+      {
+        id: 22,
+        type: 'choice',
+        question: 'My friend would be disappointed if he _____ the truth.',
+        options: ['knows', 'will know', 'knew', 'would know'],
+        answer: 'knew'
+      },
+      {
+        id: 23,
+        type: 'choice',
+        question: 'If my grandmother were in better health, she _____ my uncle in HCM City.',
+        options: ['visits', 'will visit', 'visited', 'would visit'],
+        answer: 'would visit'
+      },
+      {
+        id: 24,
+        type: 'choice',
+        question: 'If doctors find effective treatments for the disease, many lives _____ saved.',
+        options: ['are', 'will be', 'were', 'would be'],
+        answer: 'will be'
+      }
+    ]
+  },
+  {
+    id: 'en-writing',
+    title: 'English: Writing',
+    questions: [
+      {
+        id: 1,
+        type: 'input',
+        question: 'Combine: Nam plays soccer very well. He is only 14 years old.',
+        answer: [
+          'Nam, who is only 14 years old, plays soccer very well.',
+          'Nam, who plays soccer very well, is only 14 years old.',
+          'Nam, who is only 14 years old, is a very good soccer player.'
+        ],
+        hint: 'Use a relative pronoun'
+      },
+      {
+        id: 2,
+        type: 'input',
+        question: 'Combine: The girl looked very upset. Her electronic dictionary is not working.',
+        answer: [
+          'The girl whose electronic dictionary is not working looked very upset.',
+          'The girl whose electronic dictionary is not working appeared very upset.',
+          'The girl, whose electronic dictionary is not working, looked very upset.'
+        ],
+        hint: 'Use a relative pronoun'
+      },
+      {
+        id: 3,
+        type: 'input',
+        question: 'Combine: He was sitting on a chair. It was uncomfortable.',
+        answer: [
+          'He was sitting on a chair that was uncomfortable.',
+          'He was sitting on a chair which was uncomfortable.',
+          'The chair that he was sitting on was uncomfortable.',
+          'The chair on which he was sitting was uncomfortable.'
+        ],
+        hint: 'Use a relative pronoun'
+      },
+      {
+        id: 4,
+        type: 'input',
+        question: 'Combine: His grandmother had a great influence on his life. She was a hard-working woman.',
+        answer: [
+          'His grandmother, who was a hard-working woman, had a great influence on his life.',
+          'His grandmother, who had a great influence on his life, was a hard-working woman.',
+          'His grandmother, a hard-working woman, had a great influence on his life.',
+          'His hard-working grandmother had a great influence on his life.'
+        ],
+        hint: 'Use a relative pronoun'
+      },
+      {
+        id: 5,
+        type: 'input',
+        question: 'Passive: Local engineers will build a new hospital.',
+        answer: [
+          'A new hospital will be built by local engineers.',
+          'A new hospital is going to be built by local engineers.',
+          'A new hospital will be built.'
+        ],
+      },
+      {
+        id: 6,
+        type: 'input',
+        question: 'Passive: Mary may send a letter to my grandmother.',
+        answer: [
+          'A letter may be sent to my grandmother.',
+          'A letter may be sent to my grandmother by Mary.',
+          'My grandmother may be sent a letter by Mary.',
+          'A letter might be sent to my grandmother by Mary.'
+        ],
+      },
+      {
+        id: 7,
+        type: 'input',
+        question: 'Passive: We must do the project before it\'s too late.',
+        answer: [
+          'The project must be done before it\'s too late.',
+          'The project has to be done before it\'s too late.',
+          'The project must be completed before it\'s too late.',
+          'The project needs to be done before it\'s too late.'
+        ],
+      },
+      {
+        id: 8,
+        type: 'input',
+        question: 'Passive: Jane must type a letter to her.',
+        answer: [
+          'A letter must be typed to her.',
+          'A letter must be typed by Jane for her.',
+          'A letter has to be typed to her by Jane.',
+          'A letter must be typed and sent to her by Jane.'
+        ],
+      },
+      {
+        id: 9,
+        type: 'input',
+        question: 'Rewrite: Nothing is more important than happiness.',
+        answer: [
+          'Happiness is the most important thing.',
+          'Happiness is the most important thing in life.',
+          'Happiness is more important than anything else.',
+          'Nothing can be compared to the importance of happiness.'
+        ],
+      },
+      {
+        id: 10,
+        type: 'input',
+        question: 'Rewrite: No forest in the world is larger than Amazon.',
+        answer: [
+          'Amazon is the largest forest in the world.',
+          'The Amazon is the largest forest in the world.',
+          'Amazon is larger than any other forest in the world.',
+          'No other forest in the world is as large as the Amazon.'
+        ],
+      },
+      {
+        id: 11,
+        type: 'input',
+        question: 'Rewrite: Imported goods are not as expensive as local goods.',
+        answer: [
+          'Local goods are more expensive than imported goods.',
+          'Imported goods are cheaper than local goods.',
+          'Local goods are not as cheap as imported goods.',
+          'Imported goods are less expensive than local goods.'
+        ],
+      },
+      {
+        id: 12,
+        type: 'input',
+        question: 'Rewrite: The black car is cheaper than the red car.',
+        answer: [
+          'The red car is more expensive than the black car.',
+          'The black car is not as expensive as the red car.',
+          'The red car is not as cheap as the black car.',
+          'The black car is less expensive than the red car.'
+        ],
+      },
+      {
+        id: 13,
+        type: 'input',
+        question: 'Rewrite: Hurry up or, we will be late for work.',
+        answer: [
+          'If we don\'t hurry up, we\'ll be late for work.',
+          'Unless we hurry up, we will be late for work.',
+          'If we hurry up, we won\'t be late for work.',
+          'We will be late for work if we don\'t hurry up.'
+        ],
+        hint: 'Use If sentence'
+      },
+      {
+        id: 14,
+        type: 'input',
+        question: 'Rewrite: They don\'t understand the problem. They won\'t find any right solution.',
+        answer: [
+          'If they understood the problem, they would find the right solution.',
+          'If they understood the problem, they would find a right solution.',
+          'They would find the right solution if they understood the problem.',
+          'Unless they understood the problem, they wouldn\'t find the right solution.'
+        ],
+        hint: 'Use If sentence type 2'
+      },
+      {
+        id: 15,
+        type: 'input',
+        question: 'Rewrite: Ran can\'t lose weight because she doesn\'t exercise regularly.',
+        answer: [
+          'Ran could lose weight if she exercised regularly.',
+          'If Ran exercised regularly, she could lose weight.',
+          'If she exercised regularly, Ran would be able to lose weight.',
+          'Ran would lose weight if she exercised on a regular basis.'
+        ],
+      },
+      {
+        id: 16,
+        type: 'input',
+        question: 'Rewrite: Unless Nam apologizes to me, I won\'t talk to him again.',
+        answer: [
+          'If Nam doesn\'t apologize to me, I won\'t talk to him again.',
+          'I won\'t talk to Nam again if he doesn\'t apologize to me.',
+          'If Nam apologizes to me, I will talk to him again.',
+          'I will only talk to Nam again if he apologizes to me.'
+        ],
+      },
+      {
+        id: 17,
+        type: 'input',
+        question: 'Reported: "I am doing a project on the world\'s leading environmental organizations." Mr. Minh said.',
+        answer: [
+          'Mr. Minh said that he was doing a project on the world\'s leading environmental organizations.',
+          'Mr. Minh told us that he was doing a project on the world\'s leading environmental organizations.',
+          'Mr. Minh said he was working on a project about the world\'s leading environmental organizations.',
+          'According to Mr. Minh, he was doing a project on the world\'s leading environmental organizations.'
+        ],
+      },
+      {
+        id: 18,
+        type: 'input',
+        question: 'Reported: "How long have you worked for the World Wide Fund for Nature, Mr. Nam?" Mai asked.',
+        answer: [
+          'Mai asked Mr. Nam how long he had worked for the WWF.',
+          'Mai asked Mr. Nam how long he had worked for the World Wide Fund for Nature.',
+          'Mai wanted to know how long Mr. Nam had worked for the World Wide Fund for Nature.',
+          'Mai asked Mr. Nam how long he had been working for the WWF.',
+          'Mai questioned Mr. Nam about how long he had worked for the WWF.'
+        ],
+      },
+      {
+        id: 19,
+        type: 'input',
+        question: 'Reported: "Do you like watching TV programmes about wild animals?" my friend asked me.',
+        answer: [
+          'My friend asked me if I liked watching TV programmes about wild animals.',
+          'My friend asked me whether I liked watching TV programmes about wild animals.',
+          'My friend wanted to know if I liked watching TV programmes about wild animals.',
+          'My friend asked me whether or not I liked watching TV programmes about wild animals.'
+        ],
+      },
+      {
+        id: 20,
+        type: 'input',
+        question: 'Reported: "I will continue to help you with the project" my teacher said.',
+        answer: [
+          'My teacher said he/she would continue to help with the project.',
+          'My teacher said that he/she would continue to help me with the project.',
+          'My teacher told me that he/she would continue to help me with the project.',
+          'My teacher promised to continue helping me with the project.',
+          'My teacher said he/she was going to continue to help me with the project.'
+        ],
+      }
+    ]
+  },
+  {
+    id: 'en-arrangement',
+    title: 'English: Arrangement & Exchange',
+    questions: [
+      {
+        id: 1,
+        type: 'choice',
+        question: 'Arrange: a. Tom: Good morning, Alice! Did you sleep well? \nb. Alice: Yes, thank you. How about you? \nc. Alice: Good morning, Tom!',
+        options: ['a-b-c', 'c-b-a', 'b-c-a', 'c-a-b'],
+        answer: 'c-a-b'
+      },
+      {
+        id: 2,
+        type: 'choice',
+        question: 'Arrange: a. Emma: Hey, Jack! I haven\'t seen you in ages. \nb. Emma: That\'s fantastic! I need to get back to the gym, too. \nc. Jack: Hi, Emma! Yeah, I\'ve been busy with work, but I go to the gym regularly.',
+        options: ['a-c-b', 'c-a-b', 'a-b-c', 'b-c-a'],
+        answer: 'a-c-b'
+      },
+      {
+        id: 3,
+        type: 'choice',
+        question: 'Arrange: a. John: Really? I\'ve been many to watch it this weekend. \nb. John: Hey, Mike! Have you seen the new movie that came out last week? \nc. Mike: Hi, John! Yes, I saw it yesterday. It was incredible!',
+        options: ['a-b-c', 'b-c-a', 'a-c-b', 'b-a-c'],
+        answer: 'b-c-a'
+      },
+      {
+        id: 4,
+        type: 'choice',
+        question: 'Arrange: a. Ethan: Hi, Mia! Yes, I went there last weekend. The coffee was fantastic! \nb. Mia: That\'s great to hear! I\'ll have to check it out soon. \nc. Mia: Hey, Ethan! Have you tried that new café on Maple Street?',
+        options: ['a-b-c', 'c-a-b', 'a-c-b', 'c-b-a'],
+        answer: 'c-a-b'
+      },
+      {
+        id: 5,
+        type: 'choice',
+        question: 'Arrange: a. Leo: I was thinking we could start by checking out the local art scene. I heard there are some amazing galleries. \nb. Mia: Hey Leo, Have you decided what we should do when we visit the new city next weekend? \nc. Mia: That sounds awesome! I also want to explore the food markets. I love trying local dishes.',
+        options: ['a-b-c', 'b-c-a', 'b-a-c', 'c-b-a'],
+        answer: 'b-a-c'
+      },
+      {
+        id: 6,
+        type: 'choice',
+        question: 'Arrange: a. Jason: That\'s awesome! I wish I could have gone with you. \nb. Jason: Hi, Emma! Did you enjoy the concert last night? \nc. Emma: Hey, Jason! It was incredible! The band played all my favorite songs.',
+        options: ['a-c-b', 'b-a-c', 'b-c-a', 'd-b-a'],
+        answer: 'b-c-a'
+      },
+      {
+        id: 7,
+        type: 'choice',
+        question: 'Arrange paragraph: \na. Also, volunteering makes students aware of the needs around them. \nb. Finally, doing volunteer work helps students feel good about supporting others. \nc. It is thought that high school students benefit from doing voluntary work in many ways. \nd. Additionally, students develop such important skills as teamwork and communication. \ne. It should be true. Firstly, students who do voluntary work gain valuable real-world experience.',
+        options: ['e-c-a-b-d', 'e-a-c-b-d', 'c-a-b-d-e', 'c-e-a-d-b'],
+        answer: 'c-e-a-d-b'
+      },
+      {
+        id: 8,
+        type: 'choice',
+        question: 'Arrange exchange: \na. John: I\'ve been thinking about starting a new blog. \nb. Linda: That\'s a great idea! What will it be about? \nc. John: I\'m planning to write about travel and photography. \nd. Linda: Sounds exciting! You\'ve always been passionate about those topics. \ne. John: Exactly! I can\'t wait to share my experiences.',
+        options: ['a-b-c-d-e', 'a-e-d-b-c', 'a-d-b-c-e', 'a-b-d-c-e'],
+        answer: 'a-b-c-d-e'
+      },
+      {
+        id: 9,
+        type: 'choice',
+        question: 'Arrange letter: \na. I\'ve just finished reading the book you recommended. \nb. It was such a gripping story! I couldn\'t put it down. \nc. The characters were so well-developed, and the plot twists were unexpected. \nd. Thanks again for the recommendation – I loved it! \ne. Let\'s catch up soon and talk more about it.',
+        options: ['a-b-c-d-e', 'a-e-c-b-d', 'a-b-d-c-e', 'a-d-c-b-e'],
+        answer: 'a-b-c-d-e'
+      },
+      {
+        id: 10,
+        type: 'choice',
+        question: 'Arrange paragraph: \na. It also enhances cognitive abilities and boosts memory. \nb. In addition, it can open doors to new career opportunities. \nc. Language learning requires consistent practice and dedication. \nd. Overall, it\'s a rewarding process that enriches both personal and professional life. \ne. One of the main benefits of learning a new language is improving communication skills.',
+        options: ['a-b-d-c-e', 'a-c-b-d-e', 'e-a-b-c-d', 'a-d-c-b-e'],
+        answer: 'e-a-b-c-d'
+      },
+      {
+        id: 11,
+        type: 'choice',
+        question: 'Arrange letter: \na. It was such a fantastic read! \nb. I finished it in just a few days because I couldn\'t put it down. \nc. I just wanted to thank you for recommending that book to me. \nd. Hope to chat soon. \ne. Let me know if you have any more suggestions like that!',
+        options: ['c-a-b-e-d', 'a-c-b-d-e', 'a-b-d-c-e', 'c-a-d-b-e'],
+        answer: 'c-a-b-e-d'
+      },
+      {
+        id: 12,
+        type: 'choice',
+        question: 'Arrange letter: \na. I had a fantastic time meeting everyone. \nb. The food was delicious, and the games were so much fun! \nc. I wanted to thank you for inviting me to your party last weekend. \nd. Let\'s plan to get together again soon. \ne. I really appreciate your hospitality!',
+        options: ['c-d-e-b-a', 'c-a-b-e-d', 'a-b-d-c-e', 'c-e-a-d-b'],
+        answer: 'c-a-b-e-d'
+      },
+      {
+        id: 13,
+        type: 'choice',
+        question: 'Arrange letter: \na. I feel much more confident about it now. \nb. Let\'s grab coffee soon so I can catch you up on everything! \nc. I really appreciate your support. \nd. I wanted to say thanks for your help with my project last week. \ne. Your insights made a huge difference in my presentation.',
+        options: ['d-e-a-c-b', 'a-d-b-c-e', 'd-c-a-b-e', 'a-c-b-d-e'],
+        answer: 'd-e-a-c-b'
       }
     ]
   }

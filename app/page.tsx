@@ -127,9 +127,9 @@ export default function HomePage() {
             transition={{ delay: 0.5 }}
             className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto"
           >
-            {selectedSubject === 'history' || selectedSubject === 'biology' ? (
+            {selectedSubject === 'history' || selectedSubject === 'biology' || selectedSubject === 'english' ? (
               <Link 
-                href={selectedSubject === 'history' ? "/history" : "/biology"}
+                href={selectedSubject === 'history' ? "/history" : `/biology?sub=${selectedSubject}`}
                 className="w-full sm:w-auto px-12 py-5 bg-slate-900 text-white hover:bg-slate-800 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all shadow-lg active:scale-95 uppercase"
               >
                 BẮT ĐẦU ÔN TẬP
