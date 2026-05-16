@@ -127,9 +127,9 @@ export default function HomePage() {
             transition={{ delay: 0.5 }}
             className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto"
           >
-            {selectedSubject === 'history' ? (
+            {selectedSubject === 'history' || selectedSubject === 'biology' ? (
               <Link 
-                href="/history"
+                href={selectedSubject === 'history' ? "/history" : "/biology"}
                 className="w-full sm:w-auto px-12 py-5 bg-slate-900 text-white hover:bg-slate-800 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all shadow-lg active:scale-95 uppercase"
               >
                 BẮT ĐẦU ÔN TẬP
@@ -145,9 +145,9 @@ export default function HomePage() {
                 BẮT ĐẦU ÔN TẬP
               </button>
             )}
-            {selectedSubject !== 'history' && (
+            {selectedSubject !== 'history' && selectedSubject !== 'biology' && (
               <span className="text-sm text-slate-400 font-medium italic underline underline-offset-4 decoration-slate-200">
-                * Vui lòng chọn môn Lịch Sử để tiếp tục
+                * Vui lòng chọn môn học để tiếp tục
               </span>
             )}
           </motion.div>

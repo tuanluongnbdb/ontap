@@ -12,10 +12,10 @@ export function useIsMobile() {
     }
     mql.addEventListener("change", onChange)
     
-    // Set initial value inside the effect
-    if (isMobile === undefined) {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
-    }
+    // Use requestAnimationFrame or just set it
+    const checkMobile = () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    checkMobile()
+    
     return () => mql.removeEventListener("change", onChange)
   }, [])
 

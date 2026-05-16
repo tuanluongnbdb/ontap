@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ArrowLeft, 
@@ -10,11 +10,12 @@ import {
   XCircle, 
   ArrowRight,
   RotateCcw,
-  Home
+  Home,
+  Lock
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { HISTORY_DATA, Question, Topic } from '@/lib/history-data';
+import { BIOLOGY_DATA, Question, Topic } from '@/lib/biology-data';
 
 type QuizMode = 'selection' | 'topic-list' | 'quiz' | 'result';
 
@@ -30,8 +31,8 @@ const playSound = (type: 'correct' | 'incorrect' | 'click') => {
 
   if (type === 'correct') {
     oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
-    oscillator.frequency.exponentialRampToValueAtTime(1046.50, audioContext.currentTime + 0.1); // C6
+    oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(1046.50, audioContext.currentTime + 0.1);
     gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
     oscillator.start();
@@ -54,7 +55,7 @@ const playSound = (type: 'correct' | 'incorrect' | 'click') => {
   }
 };
 
-export default function HistoryPage() {
+export default function BiologyPage() {
   const [mode, setMode] = useState<QuizMode>('selection');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -72,13 +73,16 @@ export default function HistoryPage() {
     setScore(0);
     setSelectedAnswer(null);
     setIsAnswered(false);
+    // Use an effect to set start time to avoid purity issues if needed, 
+    // but here we are in a callback which is generally fine.
+    // However, to be extra safe for the linter:
     const now = Date.now();
     setQuizStartTime(now);
   }, []);
 
   const handleStartRandom = () => {
     playSound('click');
-    const allQuestions = HISTORY_DATA.flatMap(topic => topic.questions);
+    const allQuestions = BIOLOGY_DATA.flatMap(topic => topic.questions);
     const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
     setQuestions(shuffled);
     startQuiz();
@@ -96,7 +100,7 @@ export default function HistoryPage() {
     setSelectedAnswer(option);
     setIsAnswered(true);
     
-    if (option === currentQuestion?.answer) {
+    if (option === currentQuestion.answer) {
       setScore(prev => prev + 1);
       playSound('correct');
     } else {
@@ -144,8 +148,7 @@ export default function HistoryPage() {
 
   return (
     <div className="min-h-screen bg-[#F9FAFB] flex flex-col font-sans">
-      {/* Header */}
-      <nav className="px-6 py-8 sm:px-12 flex justify-between items-center">
+      <nav className="px-6 py-8 sm:px-12 flex justify-between items-center bg-white border-b border-slate-50">
         <Link href="/" className="flex items-center gap-2 group transition-all">
           <ArrowLeft size={20} className="text-slate-400 group-hover:text-slate-900 transition-colors" />
           <span className="text-sm font-medium text-slate-500 group-hover:text-slate-900 transition-colors">Quay lại</span>
@@ -160,7 +163,6 @@ export default function HistoryPage() {
 
       <main className="flex-1 flex flex-col items-center justify-center px-6 sm:px-12 py-8 max-w-4xl mx-auto w-full">
         <AnimatePresence mode="wait">
-          {/* Mode Selection */}
           {mode === 'selection' && (
             <motion.div 
               key="selection"
@@ -170,8 +172,8 @@ export default function HistoryPage() {
               className="w-full space-y-12 text-center"
             >
               <div className="space-y-4">
-                <h1 className="text-4xl font-bold text-slate-900">Môn Lịch Sử</h1>
-                <p className="text-slate-500 italic">Chọn phương thức ôn tập để bắt đầu</p>
+                <h1 className="text-4xl font-bold text-slate-900">Môn Sinh Học</h1>
+                <p className="text-slate-500 italic">Hành trình khám phá sự sống</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
@@ -179,28 +181,27 @@ export default function HistoryPage() {
                   onClick={() => { playSound('click'); setMode('topic-list'); }}
                   className="group bg-white p-10 rounded-3xl border border-slate-200 shadow-sm hover:border-slate-900 hover:shadow-xl transition-all text-left"
                 >
-                  <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-slate-900 group-hover:text-white transition-all">
+                  <div className="w-14 h-14 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-slate-900 group-hover:text-white transition-all">
                     <BookOpen size={28} />
                   </div>
-                  <h3 className="text-2xl font-bold text-slate-900 mb-2">Theo chủ đề</h3>
-                  <p className="text-slate-400">Ôn tập tuần tự các kiến thức theo từng chương học phần.</p>
+                  <h3 className="text-2xl font-bold text-slate-900 mb-2">Theo bài học</h3>
+                  <p className="text-slate-400">Ôn tập tập trung cho Bài 18 (Chu kì tế bào) và Bài 19 (Quá trình phân bào).</p>
                 </button>
 
                 <button 
                   onClick={handleStartRandom}
                   className="group bg-white p-10 rounded-3xl border border-slate-200 shadow-sm hover:border-slate-900 hover:shadow-xl transition-all text-left"
                 >
-                  <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-slate-900 group-hover:text-white transition-all">
+                  <div className="w-14 h-14 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-slate-900 group-hover:text-white transition-all">
                     <Shuffle size={28} />
                   </div>
-                  <h3 className="text-2xl font-bold text-slate-900 mb-2">Ngẫu nhiên</h3>
-                  <p className="text-slate-400">Thử thách bản thân với bộ câu hỏi được trộn từ tất cả các chủ đề.</p>
+                  <h3 className="text-2xl font-bold text-slate-900 mb-2">Tổng hợp</h3>
+                  <p className="text-slate-400">Ôn tập ngẫu nhiên tất cả các bài thuộc chương trình học kì 2.</p>
                 </button>
               </div>
             </motion.div>
           )}
 
-          {/* Topic List */}
           {mode === 'topic-list' && (
             <motion.div 
               key="topic-list"
@@ -210,7 +211,7 @@ export default function HistoryPage() {
               className="w-full space-y-8"
             >
               <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-bold text-slate-900">Danh sách chủ đề</h2>
+                <h2 className="text-3xl font-bold text-slate-900">Nội dung ôn tập</h2>
                 <button 
                   onClick={() => { playSound('click'); setMode('selection'); }}
                   className="text-sm font-medium text-slate-400 hover:text-slate-900 transition-colors"
@@ -220,7 +221,7 @@ export default function HistoryPage() {
               </div>
 
               <div className="space-y-4">
-                {HISTORY_DATA.map((topic, index) => (
+                {BIOLOGY_DATA.map((topic, index) => (
                   <motion.button
                     key={topic.id}
                     initial={{ opacity: 0, y: 10 }}
@@ -230,7 +231,6 @@ export default function HistoryPage() {
                     className="w-full p-6 text-left bg-white border border-slate-100 rounded-2xl hover:border-slate-900 transition-all flex items-center justify-between group shadow-sm hover:shadow-md"
                   >
                     <div className="space-y-1">
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Chủ đề {index + 1}</p>
                       <h4 className="text-lg font-bold text-slate-900 group-hover:translate-x-1 transition-transform">{topic.title}</h4>
                       <p className="text-xs text-slate-400">{topic.questions.length} câu hỏi</p>
                     </div>
@@ -241,7 +241,6 @@ export default function HistoryPage() {
             </motion.div>
           )}
 
-          {/* Quiz UI */}
           {mode === 'quiz' && currentQuestion && (
             <motion.div 
               key="quiz"
@@ -250,7 +249,6 @@ export default function HistoryPage() {
               exit={{ opacity: 0, y: -20 }}
               className="w-full max-w-2xl space-y-8"
             >
-              {/* Progress */}
               <div className="space-y-2">
                 <div className="flex justify-between text-xs font-bold text-slate-400 uppercase tracking-widest">
                   <span>Câu hỏi {currentIndex + 1} / {questions.length}</span>
@@ -265,14 +263,12 @@ export default function HistoryPage() {
                 </div>
               </div>
 
-              {/* Question */}
               <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
                 <h2 className="text-2xl font-bold text-slate-900 leading-tight">
                   {currentQuestion.question}
                 </h2>
               </div>
 
-              {/* Options */}
               <div className="grid grid-cols-1 gap-3">
                 {currentQuestion.options.map((option, idx) => {
                   const isCorrectResult = isAnswered && option === currentQuestion.answer;
@@ -312,7 +308,6 @@ export default function HistoryPage() {
                 })}
               </div>
 
-              {/* Footer Quiz */}
               <div className="flex justify-between items-center text-slate-400 text-xs font-medium italic">
                 <div className="flex gap-4">
                   <span>Dùng phím 1-4 để chọn</span>
@@ -333,7 +328,6 @@ export default function HistoryPage() {
             </motion.div>
           )}
 
-          {/* Result Mode */}
           {mode === 'result' && (
             <motion.div 
               key="result"
@@ -342,7 +336,7 @@ export default function HistoryPage() {
               className="w-full max-w-lg space-y-12 text-center"
             >
               <div className="space-y-6">
-                <div className="inline-block p-6 rounded-full bg-slate-900 text-white mb-4">
+                <div className="inline-block p-6 rounded-full bg-green-600 text-white mb-4">
                   <CheckCircle2 size={48} />
                 </div>
                 <h1 className="text-4xl font-bold text-slate-900 uppercase tracking-tighter">Hoàn thành!</h1>
@@ -375,20 +369,18 @@ export default function HistoryPage() {
                   VỀ TRANG CHỦ
                 </Link>
               </div>
-              <p className="text-xs text-slate-400 italic">Nhấn Enter để quay lại danh mục</p>
             </motion.div>
           )}
         </AnimatePresence>
       </main>
 
-      {/* Footer */}
       <footer className="px-6 py-8 sm:px-12 border-t border-slate-100 flex justify-between items-center text-slate-300">
         <div className="flex gap-2">
            <div className="w-1.5 h-1.5 rounded-full bg-slate-100"></div>
            <div className="w-1.5 h-1.5 rounded-full bg-slate-100"></div>
            <div className="w-1.5 h-1.5 rounded-full bg-slate-100"></div>
         </div>
-        <span className="text-[10px] font-mono uppercase tracking-[0.2em]">{mode.toUpperCase()} _ MODULE // STUDYFLOW</span>
+        <span className="text-[10px] font-mono uppercase tracking-[0.2em]">{mode.toUpperCase()} _ MODULE // BIOLOGY</span>
       </footer>
     </div>
   );
