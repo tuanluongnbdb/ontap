@@ -807,5 +807,353 @@ export const BIOLOGY_DATA: Topic[] = [
         ]
       }
     ]
+  },
+  {
+    id: 'bai-29',
+    title: 'Bài 29: VIRUS',
+    questions: [
+      {
+        id: 1,
+        type: 'choice',
+        question: 'Đặc điểm nào sau đây không đúng với virus?',
+        options: [
+          'Có kích thước siêu nhỏ (khoảng 20 – 300 nm).',
+          'Có cấu tạo tế bào mặc dù còn rất đơn giản.',
+          'Có vật chất di truyền là DNA hoặc RNA.',
+          'Chỉ có thể nhân lên trong tế bào vật chủ'
+        ],
+        answer: 'Có cấu tạo tế bào mặc dù còn rất đơn giản.'
+      },
+      {
+        id: 2,
+        type: 'choice',
+        question: 'Phát biểu nào sau đây đúng khi nói về sự khác nhau của virus và vi khuẩn?',
+        options: [
+          'Virus không nhất thiết phải sống kí sinh nội bào bắt buộc còn vi khuẩn phải sống kí sinh nội bào bắt buộc.',
+          'Virus không có hệ thống sinh năng lượng còn vi khuẩn thì có hệ thống sinh năng lượng.',
+          'Virus có hiện tượng sinh trưởng và nhân lên còn vi khuẩn thì không có hiện tượng sinh trưởng và nhân lên.',
+          'Virus có thể mẫn cảm với các chất kháng sinh còn vi khuẩn thì không mẫn cảm với các chất kháng sinh.'
+        ],
+        answer: 'Virus không có hệ thống sinh năng lượng còn vi khuẩn thì có hệ thống sinh năng lượng.'
+      },
+      {
+        id: 3,
+        type: 'choice',
+        question: 'Tại sao virus không thể nuôi trong môi trường tổng hợp như vi khuẩn?',
+        options: [
+          'Vì virus có kích thước rất nhỏ.',
+          'Vì virus có vật chất di truyền là RNA.',
+          'Vì virus sống kí sinh nội bào bắt buộc.',
+          'Vì virus không mẫn cảm với chất kháng sinh.'
+        ],
+        answer: 'Vì virus sống kí sinh nội bào bắt buộc.'
+      },
+      {
+        id: 4,
+        type: 'choice',
+        question: 'Thành phần cơ bản của virus là',
+        options: [
+          'Vỏ capsid và lõi nucleic acid.',
+          'Vỏ capsid và vỏ ngoài.',
+          'Vỏ ngoài và lõi nucleic acid.',
+          'Lõi nucleic acid và gai glycoprotein.'
+        ],
+        answer: 'Vỏ capsid và lõi nucleic acid.'
+      },
+      {
+        id: 5,
+        type: 'choice',
+        question: 'Quan sát hình ảnh mô tả cấu tạo của virus dưới đây. Thành phần cấu tạo gồm các số 1, 2, 3, 4 theo thứ tự lần lượt là',
+        options: [
+          'Vỏ capsid, vỏ ngoài, lõi nucleic acid, gai glycoprotein.',
+          'Vỏ ngoài, vỏ capsid, lõi nucleic acid, gai glycoprotein.',
+          'Vỏ capsid, gai glycoprotein, lõi nucleic acid, vỏ ngoài.',
+          'Gai glycoprotein, vỏ capsid, lõi nucleic acid, vỏ ngoài.'
+        ],
+        answer: 'Vỏ ngoài, vỏ capsid, lõi nucleic acid, gai glycoprotein.'
+      },
+      {
+        id: 6,
+        type: 'choice',
+        question: 'Các đơn vị cấu tạo nên vỏ capsid của virus là',
+        options: ['Capsomer.', 'Glycoprotein.', 'Glycerol.', 'Nucleotide.'],
+        answer: 'Capsomer.'
+      },
+      {
+        id: 7,
+        type: 'choice',
+        question: 'Cho các chức năng sau:\n(1) Nhận diện tế bào vật chủ để xâm nhập.\n(2) Bảo vệ virus khỏi hệ thống miễn dịch của tế bào vật chủ.\n(3) Giúp virus bám vào tế bào vật chủ.\n(4) Giúp virus nhân lên nhanh chóng.\nLớp vỏ ngoài của virus đảm nhận số chức năng là',
+        options: ['1.', '2.', '3.', '4.'],
+        answer: '2.'
+      },
+      {
+        id: 8,
+        type: 'choice',
+        question: 'Franken và Conrat đã tiến hành thí nghiệm tách lõi RNA ra khỏi vỏ protein của hai chủng virus A và B. Sau đó, tiến hành lấy lõi nucleic acid của chủng A kết hợp với vỏ capsid của chủng B để tạo thành virus lai. Nhiễm chủng virus lai vào cây thuốc lá thì cây sẽ bị bệnh. Theo lí thuyết, khi tiến hành phân lập từ lá cây bị bệnh sẽ thu được virus có cấu tạo gồm',
+        options: [
+          'Lõi nucleic acid của chủng A và vỏ capsid của chủng B.',
+          'Lõi nucleic acid của chủng B và vỏ capsid of chủng A.',
+          'Lõi nucleic acid of chủng A và vỏ capsid of chủng A.',
+          'Lõi nucleic acid of chủng B và vỏ capsid of chủng B.'
+        ],
+        answer: 'Lõi nucleic acid of chủng A và vỏ capsid of chủng A.'
+      },
+      {
+        id: 9,
+        type: 'choice',
+        question: 'Cho các tiêu chí sau:\n(1) Sự tồn tại của lớp vỏ ngoài\n(2) Sự sắp xếp của capsomer ở vỏ capsid\n(3) Loại vật chất di truyền\n(4) Loại vật chủ\nSố tiêu chí được sử dụng để phân loại virus là',
+        options: ['1.', '2.', '3.', '4.'],
+        answer: '4.'
+      },
+      {
+        id: 10,
+        type: 'choice',
+        question: 'Virus có thể kí sinh ở bao nhiêu sinh vật trong các sinh vật sau đây?\n(1) Vi khuẩn | (2) Nấm | (3) Thực vật | (4) Động vật | (5) Người',
+        options: ['2.', '3.', '4.', '5.'],
+        answer: '5.'
+      },
+      {
+        id: 11,
+        type: 'choice',
+        question: 'Trình tự các giai đoạn trong quá trình nhân lên của virus là',
+        options: [
+          'Xâm nhập → hấp phụ → tổng hợp → lắp ráp → phóng thích.',
+          'Xâm nhập → hấp phụ → lắp ráp → tổng hợp → phóng thích.',
+          'Hấp phụ → xâm nhập → lắp ráp → tổng hợp → phóng thích.',
+          'Hấp phụ → xâm nhập → tổng hợp → lắp ráp → phóng thích.'
+        ],
+        answer: 'Hấp phụ → xâm nhập → tổng hợp → lắp ráp → phóng thích.'
+      },
+      {
+        id: 12,
+        type: 'choice',
+        question: 'Cho các yếu tố sau:\n(1) Lượng virus\n(2) Tốc độ nhân lên và lây lan của virus\n(3) Tình trạng sức khỏe của vật chủ\n(4) Các bệnh nền của vật chủ\nTrong số các yếu tố trên, số yếu tố ảnh hưởng đến khả năng gây bệnh của virus là',
+        options: ['1.', '2.', '3.', '4.'],
+        answer: '4.'
+      },
+      {
+        id: 13,
+        type: 'true-false',
+        question: 'Nhận định về phage sau đây là Đúng hay Sai?',
+        statements: [
+          { id: 'a', text: 'Phage xâm nhập vào bên trong tế bào nhờ vào sự dung hợp màng sinh chất với vỏ ngoài.', answer: false },
+          { id: 'b', text: 'Phage xâm nhập toàn bộ thành phần cấu trúc vào bên trong tế bào vật chủ.', answer: false },
+          { id: 'c', text: 'Phage kí sinh nội bào bắt buộc bên trong cơ thể người, động vật, thực vật và nấm.', answer: false },
+          { id: 'd', text: 'Phage có cấu trúc hỗn hợp, vừa có cấu trúc xoắn vừa có cấu trúc khối.', answer: true }
+        ]
+      },
+      {
+        id: 14,
+        type: 'true-false',
+        question: 'Khi nói về ứng dụng của virus trong y học. Mỗi nhận định sau đây là Đúng hay Sai về ứng dụng này.',
+        statements: [
+          { id: 'a', text: 'Sản xuất vaccine để phòng các bệnh do virus gây ra.', answer: true },
+          { id: 'b', text: 'Sản xuất chất interferon để chống virus, tuy nhiên interferon có tính đặc hiệu với virus.', answer: false },
+          { id: 'c', text: 'Sản xuất hormone insulin để điều trị bệnh tiểu đường.', answer: true },
+          { id: 'd', text: 'Sản xuất interferon để tăng cường khả năng miễn dịch cho cơ thể.', answer: true }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'bai-30',
+    title: 'Bài 30: ỨNG DỤNG CỦA VIRUS TRONG Y HỌC VÀ THỰC TIỄN',
+    questions: [
+      {
+        id: 1,
+        type: 'choice',
+        question: 'Chế phẩm sinh học nào sau đây được sản xuất nhờ virus?',
+        options: ['Đệm lót sinh học.', 'Bio – EM.', 'Thuốc trừ sâu Bt.', 'Insulin.'],
+        answer: 'Insulin.'
+      },
+      {
+        id: 2,
+        type: 'choice',
+        question: 'Ưu điểm của chế phẩm được sản xuất nhờ ứng dụng virus là gì?',
+        options: [
+          '(1), (2).',
+          '(1), (3).',
+          '(2), (3).',
+          '(2), (4).'
+        ],
+        answer: '(1), (3).'
+      },
+      {
+        id: 3,
+        type: 'choice',
+        question: 'Dựa vào tính chất nào mà phage được dùng để làm vector trong sản xuất chế phẩm sinh học bằng công nghệ tái tổ hợp?',
+        options: [
+          'Một số phage, chứa các đoạn gene không thực sự quan trọng, nếu cắt bỏ và thay bởi một đoạn gene khác thì quá trình nhân lên của chúng không bị ảnh hưởng.',
+          'Phage có hệ gene là các phân tử RNA, có thể vận chuyển bất cứ gen nào vào tế bào vi khuẩn và luôn có khả năng nhân lên rất nhanh.',
+          'Một số phage chứa các DNA dạng vòng có thể mang gene mong muốn vào tế bào vi khuẩn và có khả năng nhân lên rất nhanh.',
+          'Phage có hệ gene là các phân tử DNA đủ dài để có thể vận chuyển các gene mong muốn vào tế bào vi khuẩn mà không ảnh hưởng đến khả năng nhân lên của nó trong tế bào chủ.'
+        ],
+        answer: 'Một số phage, chứa các đoạn gene không thực sự quan trọng, nếu cắt bỏ và thay bởi một đoạn gene khác thì quá trình nhân lên của chúng không bị ảnh hưởng.'
+      },
+      {
+        id: 4,
+        type: 'choice',
+        question: 'Hãy sắp xếp các bước của quy trình sản xuất chế phẩm sinh học bằng công nghệ tái tổ hợp sử dụng vector từ virus sao cho phù hợp.\n(1) Tạo vector virus tái tổ hợp.\n(2) Tiến hành nuôi vi khuẩn để thu sinh khối.\n(3) Biến nạp gene mong muốn vào cơ thể vi khuẩn.\n(4) Tách chiết sinh khối để thu chế phẩm.',
+        options: [
+          '(1), (2), (3), (4).',
+          '(1), (2), (4), (3).',
+          '(1), (3), (2), (4).',
+          '(1), (3), (4), (2).'
+        ],
+        answer: '(1), (3), (2), (4).'
+      },
+      {
+        id: 5,
+        type: 'choice',
+        question: 'Vì sao insulin được dùng để điều trị bệnh tiểu đường?',
+        options: [
+          'Vì insulin có khả năng kích thích làm cho glucose chuyển hóa thành glycogen dự trữ trong gan, cơ; làm chậm quá trình phân giải glycogen; ức chế chuyển hóa amino acid và glycerol thành glucose.',
+          'Vì insulin có khả năng ức chế làm cho glucose chuyển hóa thành glycogen dự trữ trong gan, cơ; làm chậm quá trình phân giải glycogen; ức chế chuyển hóa amino acid và glycerol thành glucose.',
+          'Vì insulin có khả năng ức chế làm cho glucose chuyển hóa thành glycogen dự trữ trong gan, cơ; làm tăng quá trình phân giải glycogen; ức chế chuyển hóa amino acid và glycerol thành glucose.',
+          'Vì insulin có khả năng ức chế làm cho glucose chuyển hóa thành glycogen dự trữ trong gan, cơ; làm tăng quá trình phân giải glycogen; kích thích chuyển hóa amino acid và glycerol thành glucose.'
+        ],
+        answer: 'Vì insulin có khả năng kích thích làm cho glucose chuyển hóa thành glycogen dự trữ trong gan, cơ; làm chậm quá trình phân giải glycogen; ức chế chuyển hóa amino acid và glycerol thành glucose.'
+      },
+      {
+        id: 6,
+        type: 'choice',
+        question: 'Phát biểu nào sau đây là đúng khi nói về vai trò của interferon trong việc giúp cơ thể chống lại virus?',
+        options: [
+          'Interferon có tính đặc hiệu với từng loại virus nhất định.',
+          'Interferon có khả năng kích thích cơ thể sản xuất ra kháng thể chống lại virus.',
+          'Interferon kích thích cơ thể tạo ra chất chống virus.',
+          'Interferon có vai trò như kháng thể, có khả năng chống lại virus.'
+        ],
+        answer: 'Interferon kích thích cơ thể tạo ra chất chống virus.'
+      },
+      {
+        id: 7,
+        type: 'choice',
+        question: 'Điểm khác biệt giữa Interferon và vaccine là gì?',
+        options: [
+          'Interferon là protein do tế bào sản xuất ra, còn vaccine là kháng nguyên đã bị làm yếu đi, có nguồn gốc từ virus hoặc vi khuẩn gây bệnh.',
+          'Interferon là protein do hệ gene virus sản xuất ra, còn vaccine là virus hoặc vi khuẩn gây bệnh đã được làm yếu đi.',
+          'Interferon là chất ức chế sự nhân lên của virus, còn vaccine có tác dụng kích thích cơ thể sản xuất kháng thể chống lại virus.',
+          'Interferon có tính đặc hiệu with virus, còn vaccine không có tính đặc hiệu with virus.'
+        ],
+        answer: 'Interferon là protein do tế bào sản xuất ra, còn vaccine là kháng nguyên đã bị làm yếu đi, có nguồn gốc từ virus hoặc vi khuẩn gây bệnh.'
+      },
+      {
+        id: 8,
+        type: 'choice',
+        question: 'Thuốc trừ sâu từ virus được sản xuất dựa trên cơ sở nào?',
+        options: [
+          'Một số loại virus mang gene kháng vi nấm gây bệnh cho cây trồng.',
+          'Một số loại virus làm vector chuyển gene kháng bệnh cho cây trồng.',
+          'Một số loại virus có khả năng tạo ra chất để tiêu diệt sâu hại cây trồng.',
+          'Một số loại virus có khả năng xâm nhập và gây bệnh cho sâu hại cây trồng.'
+        ],
+        answer: 'Một số loại virus có khả năng xâm nhập và gây bệnh cho sâu hại cây trồng.'
+      }
+    ]
+  },
+  {
+    id: 'bai-31',
+    title: 'Bài 31: VIRUS GÂY BỆNH',
+    questions: [
+      {
+        id: 1,
+        type: 'choice',
+        question: 'Virus nào sau đây không lây qua đường hô hấp?',
+        options: ['SARV-CoV-2.', 'Cúm.', 'Viêm gan B.', 'Lao phổi.'],
+        answer: 'Viêm gan B.'
+      },
+      {
+        id: 2,
+        type: 'choice',
+        question: 'Sau khi xâm nhập vào tế bào vật chủ, virus có khả năng nhân lên......, phá vỡ tế bào, tiếp tục lan truyền sang phá vỡ các tế bào khác.',
+        options: ['nhanh.', 'rất nhanh.', 'chậm.', 'tương đối nhanh.'],
+        answer: 'rất nhanh.'
+      },
+      {
+        id: 3,
+        type: 'choice',
+        question: 'Trong các phương thức sau, đâu không phải là phương thức lây truyền bệnh do virus ở người, động vật, thực vật?',
+        options: ['Truyền ngang.', 'Truyền dọc.', 'Truyền từ cá thể này sang cá thể khác.', 'Truyền gián tiếp.'],
+        answer: 'Truyền gián tiếp.'
+      },
+      {
+        id: 4,
+        type: 'choice',
+        question: 'Virus không lây lan qua tiếp xúc trực tiếp theo con đường nào?',
+        options: ['Dùng chung chén đĩa.', 'Qua gió.', 'Qua đường máu.', 'Qua vết cắn chó mèo.'],
+        answer: 'Qua gió.'
+      },
+      {
+        id: 5,
+        type: 'choice',
+        question: 'Trong các con đường sau, đâu không phải là con đường lây lan bằng phương thức truyền dọc đối với người và động vật?',
+        options: ['Qua phấn hoa.', 'Qua vết cắn sâu bọ.', 'Qua hạt giống.', 'Qua nhân giống vô tính.'],
+        answer: 'Qua vết cắn sâu bọ.'
+      },
+      {
+        id: 6,
+        type: 'choice',
+        question: 'Để phòng chống virus lây qua đường hô hấp. Ta cần phải làm gì?',
+        options: [
+          'Không dùng chung bát đĩa, ly nước.',
+          'Giữ gìn vệ sinh cá nhân.',
+          'Tránh tiếp xúc với với các động vật truyền bệnh.',
+          'Đeo khẩu trang khi đi ra đường.'
+        ],
+        answer: 'Đeo khẩu trang khi đi ra đường.'
+      },
+      {
+        id: 7,
+        type: 'choice',
+        question: 'Người mẹ cần phải làm gì để phòng chống virus lây qua đường từ mẹ sang con?',
+        options: [
+          'Đeo khẩu trang khi chăm sóc con.',
+          'Không để con bú sữa mẹ.',
+          'Vẫn quyết định đẻ, khi biết mình có nguy cơ mắc bệnh truyền nhiễm.',
+          'Tiêm vaccine đầy đủ trước khi mang thai.'
+        ],
+        answer: 'Tiêm vaccine đầy đủ trước khi mang thai.'
+      },
+      {
+        id: 8,
+        type: 'choice',
+        question: 'HIV/AIDS lây lan qua bao nhiêu con đường?',
+        options: ['2.', '3.', '4.', '5.'],
+        answer: '3.'
+      },
+      {
+        id: 9,
+        type: 'choice',
+        question: '"Nhức đầu, đau họng, sốt rét, sưng hạch. Bệnh lây qua đường hô hấp, nhân lên trong đường hô hấp sau đó tới máu và da". Đây là triệu chứng của nhiễm loại virus nào?',
+        options: ['Cúm.', 'SARV-CoV.', 'Sởi Đức.', 'Viêm đường hô hấp cấp.'],
+        answer: 'Sởi Đức.'
+      },
+      {
+        id: 10,
+        type: 'choice',
+        question: 'Lợn sốt cao, bỏ ăn, lưỡi vận động, một số vùng da chuyển sang màu xanh tím, xuất huyết ở tai và bụng. Một thời gian sau lợn hôn mê và chết. Đây là triệu chứng của',
+        options: ['Xuất huyết tiêu hóa.', 'Dịch tả lợn Châu Phi.', 'Bệnh đóng dấu lợn.', 'Cầu trùng ở lợn.'],
+        answer: 'Dịch tả lợn Châu Phi.'
+      },
+      {
+        id: 11,
+        type: 'choice',
+        question: 'Trong các bệnh sau bệnh nào do virus gây nên?',
+        options: ['Sốt.', 'HIV.', 'Vàng da.', 'Tiêu chảy.'],
+        answer: 'HIV.'
+      },
+      {
+        id: 12,
+        type: 'true-false',
+        question: 'Hình bên mô tả một dịch bệnh do một loại virus cúm A trên gia cầm gây ra... Hãy cho biết phát biểu nhận định nào sau đây đúng hay sai',
+        statements: [
+          { id: 'a', text: 'Dịch bệnh này do virus cúm A H₅N₁ gây ra.', answer: true },
+          { id: 'b', text: 'Kiểu gây bệnh của virus này là truyền ngang.', answer: true },
+          { id: 'c', text: 'Virus này gây ra các bệnh nguy hiểm về hệ miễn dịch.', answer: false },
+          { id: 'd', text: 'Vật trung gian truyền bệnh là gia cầm, gia súc.', answer: true }
+        ]
+      }
+    ]
   }
 ];
