@@ -303,6 +303,13 @@ function QuizContent() {
               setFocusedIndex(idx);
             }
           }
+          // Cycling selection with Space
+          if (e.key === ' ') {
+            setFocusedIndex(prev => {
+              if (prev === null) return 0;
+              return (prev + 1) % currentQuestion.statements.length;
+            });
+          }
           // Set answer for focused statement
           if (focusedIndex !== null && focusedIndex < currentQuestion.statements.length) {
             if (e.key.toLowerCase() === 'd') {
