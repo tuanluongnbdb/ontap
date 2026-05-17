@@ -62,17 +62,39 @@ export default function HomePage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            <h1 className="text-4xl sm:text-6xl font-bold text-slate-900 leading-[1.1] mb-6">
-              Ôn tập cuối học kỳ 2
+            <h1 className="text-4xl sm:text-6xl font-bold text-slate-900 leading-[1.1] mb-4">
+              Hệ thống ôn tập <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-500">Cuối học kỳ 2</span>
             </h1>
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3, duration: 0.8 }}
+              className="text-slate-500 text-lg sm:text-xl font-medium italic"
+            >
+              Nâng cao hiệu quả học tập với phương pháp ôn tập thông minh.
+            </motion.p>
           </motion.div>
         </div>
 
         {/* Subjects Grid */}
-        <div className="grid grid-cols-1 gap-6 mb-16 sm:grid-cols-3">
-          {SUBJECTS.map((subject, index) => {
+        <motion.div 
+          variants={{
+            hidden: { opacity: 0 },
+            show: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.1
+              }
+            }
+          }}
+          initial="hidden"
+          animate="show"
+          className="grid grid-cols-1 gap-6 mb-16 sm:grid-cols-3"
+        >
+          {SUBJECTS.map((subject) => {
             const Icon = subject.icon;
             const isSelected = selectedSubject === subject.id;
 
@@ -80,19 +102,16 @@ export default function HomePage() {
               <motion.button
                 key={subject.id}
                 id={`subject-${subject.id}`}
-                onClick={() => setSelectedSubject(subject.id)}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ 
-                  duration: 0.6, 
-                  delay: 0.1 * index,
-                  ease: [0.22, 1, 0.36, 1] 
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } }
                 }}
+                onClick={() => setSelectedSubject(subject.id)}
                 className={cn(
                   "group relative bg-white border p-8 rounded-2xl shadow-sm text-left transition-all duration-300",
                   isSelected 
-                    ? `border-slate-800 ring-1 ring-slate-800` 
-                    : `border-slate-200 ${subject.hoverBorder}`
+                    ? `border-slate-800 ring-1 ring-slate-800 shadow-md` 
+                    : `border-slate-200 ${subject.hoverBorder} hover:shadow-lg`
                 )}
               >
                 <div className={cn(
@@ -110,14 +129,15 @@ export default function HomePage() {
                 {isSelected && (
                   <motion.div 
                     layoutId="selection-glow"
-                    className="absolute inset-0 rounded-2xl bg-slate-900/5 -z-10"
-                    initial={false}
+                    className="absolute inset-0 rounded-2xl bg-slate-900/[0.03] -z-10"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                   />
                 )}
               </motion.button>
             );
           })}
-        </div>
+        </motion.div>
 
         {/* Access Button (Locked State) */}
         <div className="flex flex-col sm:flex-row items-center gap-4">

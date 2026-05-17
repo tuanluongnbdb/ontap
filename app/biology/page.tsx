@@ -74,6 +74,8 @@ function QuizContent() {
   const [isAnswered, setIsAnswered] = useState(false);
   const [quizStartTime, setQuizStartTime] = useState<number>(0);
   const [quizDuration, setQuizDuration] = useState<number>(0);
+  const [currentTopicId, setCurrentTopicId] = useState<string | null>(null);
+  const [showFeedback, setShowFeedback] = useState<'none' | 'correct' | 'incorrect'>('none');
 
   const currentTopicData = subject === 'biology' ? BIOLOGY_DATA : ENGLISH_DATA;
 
@@ -96,6 +98,7 @@ function QuizContent() {
 
   const handleStartRandom = () => {
     playSound('click');
+    setCurrentTopicId(null);
     const allQuestions = currentTopicData.flatMap(topic => topic.questions);
     const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
     startQuiz(shuffled);
@@ -103,6 +106,7 @@ function QuizContent() {
 
   const handleSelectTopic = (topic: Topic) => {
     playSound('click');
+    setCurrentTopicId(topic.id);
     startQuiz(topic.questions);
   };
 
@@ -151,11 +155,16 @@ function QuizContent() {
     
     if (option === currentQuestion.answer) {
       setScore(prev => prev + 1);
+      setShowFeedback('correct');
       playSound('correct');
     } else {
       setWrongQuestions(prev => [...prev, currentQuestion]);
+      setShowFeedback('incorrect');
       playSound('incorrect');
     }
+
+    // Hide feedback after short delay
+    setTimeout(() => setShowFeedback('none'), 1500);
   }, [isAnswered, currentQuestion]);
 
   const handleTFAnswer = (statementId: string, value: boolean) => {
@@ -178,17 +187,23 @@ function QuizContent() {
     
     if (isCorrect) {
       setScore(prev => prev + 1);
+      setShowFeedback('correct');
       playSound('correct');
     } else {
       setWrongQuestions(prev => [...prev, currentQuestion]);
+      setShowFeedback('incorrect');
       playSound('incorrect');
     }
+
+    setTimeout(() => setShowFeedback('none'), 1500);
   }, [isAnswered, checkCompositeCorrect, currentQuestion]);
 
   const handleNext = useCallback(() => {
     if (!isAnswered) return;
     
     playSound('click');
+    setShowFeedback('none');
+    
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(prev => prev + 1);
       setSelectedAnswer(null);
@@ -196,10 +211,12 @@ function QuizContent() {
       setMatchingAnswers({});
       setInputAnswer('');
       setIsAnswered(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       const now = Date.now();
       setQuizDuration(Math.round((now - quizStartTime) / 1000));
       setMode('result');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [currentIndex, questions.length, isAnswered, quizStartTime]);
 
@@ -358,13 +375,25 @@ function QuizContent() {
                 </button>
               </div>
 
-              <div className="space-y-3 sm:space-y-4">
-                {currentTopicData.map((topic, index) => (
+              <motion.div 
+                variants={{
+                  hidden: { opacity: 0 },
+                  show: {
+                    opacity: 1,
+                    transition: { staggerChildren: 0.05 }
+                  }
+                }}
+                initial="hidden"
+                animate="show"
+                className="space-y-3 sm:space-y-4"
+              >
+                {currentTopicData.map((topic) => (
                   <motion.button
                     key={topic.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
+                    variants={{
+                      hidden: { opacity: 0, y: 10 },
+                      show: { opacity: 1, y: 0 }
+                    }}
                     onClick={() => handleSelectTopic(topic)}
                     className="w-full p-4 sm:p-6 text-left bg-white border border-slate-100 rounded-2xl hover:border-slate-900 transition-all flex items-center justify-between group shadow-sm hover:shadow-md"
                   >
@@ -375,7 +404,7 @@ function QuizContent() {
                     <ArrowRight className="text-slate-200 group-hover:text-slate-900 transition-colors shrink-0 ml-4" size={20} />
                   </motion.button>
                 ))}
-              </div>
+              </motion.div>
             </motion.div>
           )}
 
@@ -401,7 +430,22 @@ function QuizContent() {
                 </div>
               </div>
 
-              <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-sm">
+              <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
+                <AnimatePresence>
+                  {showFeedback !== 'none' && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className={cn(
+                        "absolute top-0 right-0 p-4 font-bold text-[10px] uppercase tracking-widest pointer-events-none z-10",
+                        showFeedback === 'correct' ? "text-green-500" : "text-red-500"
+                      )}
+                    >
+                      {showFeedback === 'correct' ? 'Chính xác!' : 'Chưa đúng!'}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-900 leading-tight">
                   {currentQuestion.question}
                 </h2>
@@ -654,52 +698,88 @@ function QuizContent() {
               animate={{ opacity: 1, scale: 1 }}
               className="w-full max-w-lg space-y-8 sm:space-y-12 text-center"
             >
-              <div className="space-y-6">
-                <div className="inline-block p-4 sm:p-6 rounded-full bg-green-600 text-white mb-2 underline-none">
-                  <CheckCircle2 size={40} className="sm:w-[48px] sm:h-[48px]" />
-                </div>
-                <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 uppercase tracking-tighter">Hoàn thành!</h1>
-                <div className="flex justify-center gap-8 sm:gap-12">
-                  <div className="space-y-1">
-                    <p className="text-4xl sm:text-5xl font-black text-slate-900">{score}/{questions.length}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Điểm số</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-4xl sm:text-5xl font-black text-slate-900">{Math.round((score / questions.length) * 100)}%</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Độ chính xác</p>
-                  </div>
-                </div>
-                <p className="text-slate-400 text-xs italic">Thời gian hoàn thành: {quizDuration} giây</p>
-              </div>
+              {(() => {
+                const currentIndexTopic = currentTopicData.findIndex(t => t.id === currentTopicId);
+                const nextTopic = currentIndexTopic !== -1 && currentIndexTopic < currentTopicData.length - 1 ? currentTopicData[currentIndexTopic + 1] : null;
 
-              <div className="flex flex-col gap-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <button 
-                  onClick={() => handleStartRandom()}
-                  className="flex items-center justify-center gap-3 py-4 sm:py-5 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all active:scale-95 shadow-lg text-sm sm:text-base"
-                >
-                  <RotateCcw size={18} />
-                  ÔN LẠI TỪ ĐẦU
-                </button>
-                <Link 
-                  href="/"
-                  className="flex items-center justify-center gap-3 py-4 sm:py-5 bg-white text-slate-900 border border-slate-200 rounded-2xl font-bold hover:border-slate-900 transition-all active:scale-95 text-sm sm:text-base"
-                >
-                  <Home size={18} />
-                  VỀ TRANG CHỦ
-                </Link>
-                </div>
-                
-                {wrongQuestions.length > 0 && (
-                  <button 
-                  onClick={handleReviewWrong}
-                  className="flex items-center justify-center gap-3 py-4 sm:py-5 bg-red-50 text-red-600 border border-red-100 rounded-2xl font-bold hover:bg-red-100 transition-all active:scale-95 text-sm sm:text-base"
-                >
-                  <BookOpen size={18} />
-                  ÔN LẠI CÂU SAI ({wrongQuestions.length})
-                </button>
-                )}
-              </div>
+                return (
+                  <>
+                    <div className="space-y-6">
+                      <div className="inline-block p-4 sm:p-6 rounded-full bg-green-600 text-white mb-2 underline-none">
+                        <CheckCircle2 size={40} className="sm:w-[48px] sm:h-[48px]" />
+                      </div>
+                      <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 uppercase tracking-tighter">Hoàn thành!</h1>
+                      <div className="flex justify-center gap-8 sm:gap-12">
+                        <div className="space-y-1">
+                          <p className="text-4xl sm:text-5xl font-black text-slate-900">{score}/{questions.length}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Điểm số</p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-4xl sm:text-5xl font-black text-slate-900">{Math.round((score / questions.length) * 100)}%</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Độ chính xác</p>
+                        </div>
+                      </div>
+                      <p className="text-slate-400 text-xs italic">Thời gian hoàn thành: {quizDuration} giây</p>
+                    </div>
+
+                    <div className="flex flex-col gap-3">
+                      {nextTopic && (
+                        <button 
+                          onClick={() => handleSelectTopic(nextTopic)}
+                          className="flex items-center justify-center gap-3 py-4 sm:py-5 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition-all active:scale-95 shadow-lg text-sm sm:text-base mb-2"
+                        >
+                          <ArrowRight size={18} />
+                          CHUYỂN SANG: {nextTopic.title.toUpperCase()}
+                        </button>
+                      )}
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button 
+                          onClick={() => {
+                            if (currentTopicId) {
+                              const t = currentTopicData.find(x => x.id === currentTopicId);
+                              if (t) handleSelectTopic(t);
+                            } else {
+                              handleStartRandom();
+                            }
+                          }}
+                          className="flex items-center justify-center gap-3 py-4 sm:py-5 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all active:scale-95 shadow-lg text-sm sm:text-base"
+                        >
+                          <RotateCcw size={18} />
+                          ÔN LẠI TỪ ĐẦU
+                        </button>
+                        <Link 
+                          href="/"
+                          className="flex items-center justify-center gap-3 py-4 sm:py-5 bg-white text-slate-900 border border-slate-200 rounded-2xl font-bold hover:border-slate-900 transition-all active:scale-95 text-sm sm:text-base"
+                        >
+                          <Home size={18} />
+                          VỀ TRANG CHỦ
+                        </Link>
+                      </div>
+                      
+                      {wrongQuestions.length > 0 && (
+                        <button 
+                          onClick={handleReviewWrong}
+                          className="flex items-center justify-center gap-3 py-4 sm:py-5 bg-red-50 text-red-600 border border-red-100 rounded-2xl font-bold hover:bg-red-100 transition-all active:scale-95 text-sm sm:text-base"
+                        >
+                          <BookOpen size={18} />
+                          ÔN LẠI CÂU SAI ({wrongQuestions.length})
+                        </button>
+                      )}
+
+                      {!nextTopic && (
+                        <button 
+                          onClick={() => { playSound('click'); setMode('topic-list'); }}
+                          className="flex items-center justify-center gap-3 py-4 sm:py-5 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all active:scale-95 text-sm sm:text-base"
+                        >
+                          <BookOpen size={18} />
+                          CHỌN CHỦ ĐỀ KHÁC
+                        </button>
+                      )}
+                    </div>
+                  </>
+                );
+              })()}
             </motion.div>
           )}
         </AnimatePresence>
