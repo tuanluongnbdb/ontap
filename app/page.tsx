@@ -11,7 +11,6 @@ const SUBJECTS = [
     id: 'english',
     name: 'Tiếng Anh',
     icon: Languages,
-    description: 'Luyện kỹ năng giao tiếp và ngữ pháp chuyên sâu.',
     colorClass: 'text-blue-600',
     bgClass: 'bg-blue-50',
     hoverBorder: 'hover:border-blue-500',
@@ -21,7 +20,6 @@ const SUBJECTS = [
     id: 'biology',
     name: 'Sinh Học',
     icon: Dna,
-    description: 'Khám phá thế giới tự nhiên và sự sống con người.',
     colorClass: 'text-green-600',
     bgClass: 'bg-green-50',
     hoverBorder: 'hover:border-green-500',
@@ -31,7 +29,6 @@ const SUBJECTS = [
     id: 'history',
     name: 'Lịch Sử',
     icon: ScrollText,
-    description: 'Tìm hiểu về các nền văn minh và các sự kiện vĩ đại.',
     colorClass: 'text-orange-600',
     bgClass: 'bg-orange-50',
     hoverBorder: 'hover:border-orange-500',
@@ -147,9 +144,9 @@ export default function HomePage() {
             transition={{ delay: 0.5 }}
             className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto"
           >
-            {selectedSubject === 'history' || selectedSubject === 'biology' || selectedSubject === 'english' ? (
+            {selectedSubject ? (
               <Link 
-                href={selectedSubject === 'history' ? "/history" : `/biology?sub=${selectedSubject}`}
+                href={`/biology?sub=${selectedSubject}`}
                 className="w-full sm:w-auto px-12 py-5 bg-slate-900 text-white hover:bg-slate-800 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all shadow-lg active:scale-95 uppercase"
               >
                 BẮT ĐẦU ÔN TẬP
@@ -165,7 +162,7 @@ export default function HomePage() {
                 BẮT ĐẦU ÔN TẬP
               </button>
             )}
-            {selectedSubject !== 'history' && selectedSubject !== 'biology' && (
+            {!selectedSubject && (
               <span className="text-sm text-slate-400 font-medium italic underline underline-offset-4 decoration-slate-200">
                 * Vui lòng chọn môn học để tiếp tục
               </span>

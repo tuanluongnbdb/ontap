@@ -16,9 +16,15 @@ import {
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { BIOLOGY_DATA, ENGLISH_DATA, Question, Topic } from '@/lib/quiz-data';
+import { 
+  BIOLOGY_DATA, 
+  ENGLISH_DATA, 
+  HISTORY_DATA,
+  Question, 
+  Topic 
+} from '@/lib/quiz-data';
 
-type Subject = 'biology' | 'english';
+type Subject = 'biology' | 'english' | 'history';
 type QuizMode = 'subject-selection' | 'selection' | 'topic-list' | 'quiz' | 'result';
 
 // Simple sound utility using Web Audio API
@@ -77,7 +83,19 @@ function QuizContent() {
   const [currentTopicId, setCurrentTopicId] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState<'none' | 'correct' | 'incorrect'>('none');
 
-  const currentTopicData = subject === 'biology' ? BIOLOGY_DATA : ENGLISH_DATA;
+  const currentTopicData = React.useMemo(() => {
+    if (subject === 'biology') return BIOLOGY_DATA;
+    if (subject === 'english') return ENGLISH_DATA;
+    if (subject === 'history') return HISTORY_DATA;
+    return BIOLOGY_DATA;
+  }, [subject]);
+
+  const subjectTitle = React.useMemo(() => {
+    if (subject === 'biology') return 'Sinh Học';
+    if (subject === 'english') return 'Tiếng Anh';
+    if (subject === 'history') return 'Lịch Sử';
+    return 'Môn Học';
+  }, [subject]);
 
   const currentQuestion = questions[currentIndex];
 
@@ -279,30 +297,40 @@ function QuizContent() {
             >
               <div className="space-y-4">
                 <h1 className="text-3xl sm:text-4xl font-bold text-slate-900">Chọn môn học</h1>
-                <p className="text-slate-500 italic text-sm">Bắt đầu hành trình chinh phục kiến thức</p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                 <button 
                   onClick={() => { playSound('click'); setSubject('biology'); setMode('selection'); }}
-                  className="group bg-white p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-sm hover:border-slate-900 hover:shadow-xl transition-all text-left"
+                  className="group bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm hover:border-slate-900 hover:shadow-xl transition-all text-left"
                 >
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 group-hover:bg-slate-900 group-hover:text-white transition-all text-2xl font-bold">
+                  <div className="w-12 h-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-slate-900 group-hover:text-white transition-all text-xl font-bold">
                     B
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">Sinh học</h3>
-                  <p className="text-slate-400 text-sm">Khám phá chu kì tế bào, vi sinh vật và virus.</p>
+                  <h3 className="text-lg font-bold text-slate-900 mb-1">Sinh học</h3>
+                  <p className="text-slate-400 text-xs">Chu kì tế bào, vi sinh vật.</p>
+                </button>
+
+                <button 
+                  onClick={() => { playSound('click'); setSubject('history'); setMode('selection'); }}
+                  className="group bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm hover:border-slate-900 hover:shadow-xl transition-all text-left"
+                >
+                  <div className="w-12 h-12 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-slate-900 group-hover:text-white transition-all text-xl font-bold">
+                    H
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 mb-1">Lịch sử</h3>
+                  <p className="text-slate-400 text-xs">Văn minh Việt Nam qua các thời kỳ.</p>
                 </button>
 
                 <button 
                   onClick={() => { playSound('click'); setSubject('english'); setMode('selection'); }}
-                  className="group bg-white p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-sm hover:border-slate-900 hover:shadow-xl transition-all text-left"
+                  className="group bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm hover:border-slate-900 hover:shadow-xl transition-all text-left"
                 >
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 group-hover:bg-slate-900 group-hover:text-white transition-all text-2xl font-bold">
+                  <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-slate-900 group-hover:text-white transition-all text-xl font-bold">
                     E
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">Tiếng Anh</h3>
-                  <p className="text-slate-400 text-sm">Luyện tập từ vựng, ngữ pháp và kỹ năng viết.</p>
+                  <h3 className="text-lg font-bold text-slate-900 mb-1">Tiếng Anh</h3>
+                  <p className="text-slate-400 text-xs">Từ vựng, ngữ pháp & writing.</p>
                 </button>
               </div>
             </motion.div>
@@ -324,11 +352,8 @@ function QuizContent() {
                   <ArrowLeft size={12} /> Thay đổi môn học
                 </button>
                 <h1 className="text-3xl sm:text-4xl font-bold text-slate-900">
-                  Môn {subject === 'biology' ? 'Sinh Học' : 'Tiếng Anh'}
+                  Môn {subjectTitle}
                 </h1>
-                <p className="text-slate-500 italic text-sm">
-                  {subject === 'biology' ? 'Hành trình khám phá sự sống' : 'Nâng cao trình độ ngoại ngữ'}
-                </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
@@ -722,18 +747,22 @@ function QuizContent() {
                       <p className="text-slate-400 text-xs italic">Thời gian hoàn thành: {quizDuration} giây</p>
                     </div>
 
-                    <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-4">
                       {nextTopic && (
-                        <button 
+                        <motion.button 
+                          initial={{ scale: 0.9, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: 0.3 }}
                           onClick={() => handleSelectTopic(nextTopic)}
-                          className="flex items-center justify-center gap-3 py-4 sm:py-5 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition-all active:scale-95 shadow-lg text-sm sm:text-base mb-2"
+                          className="flex items-center justify-center gap-3 py-5 sm:py-6 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition-all active:scale-95 shadow-xl text-base sm:text-lg mb-2 relative overflow-hidden group"
                         >
-                          <ArrowRight size={18} />
-                          CHUYỂN SANG: {nextTopic.title.toUpperCase()}
-                        </button>
+                          <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                          <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                          TIẾP TỤC: {nextTopic.title.toUpperCase()}
+                        </motion.button>
                       )}
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-4">
                         <button 
                           onClick={() => {
                             if (currentTopicId) {

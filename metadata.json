@@ -1,6 +1,6 @@
 {
   "name": "StudyFlow",
-  "description": "A minimalist and modern subject selection portal.",
+  "description": "Nền tảng ôn tập thông minh cho các môn Sinh học, Tiếng Anh và Lịch sử.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
