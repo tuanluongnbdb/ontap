@@ -109,14 +109,19 @@ function QuizContent() {
       return result;
     }
 
-    const preparedQuestions = quizQuestions.map(q => {
+    // First shuffle the questions themselves
+    const shuffledQuestions = shuffle(quizQuestions);
+
+    const preparedQuestions = shuffledQuestions.map(q => {
       if (q.type === 'choice') {
-        const shuffledOptions = shuffle(q.options);
-        return { ...q, options: shuffledOptions };
+        return { ...q, options: shuffle(q.options) };
       }
       if (q.type === 'true-false') {
-        const shuffledStatements = shuffle(q.statements);
-        return { ...q, statements: shuffledStatements };
+        return { ...q, statements: shuffle(q.statements) };
+      }
+      if (q.type === 'matching') {
+        // For matching, we shuffle the order of pairs
+        return { ...q, pairs: shuffle(q.pairs) };
       }
       return q;
     });
