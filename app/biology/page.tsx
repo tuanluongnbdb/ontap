@@ -100,8 +100,29 @@ function QuizContent() {
   const currentQuestion = questions[currentIndex];
 
   const startQuiz = useCallback((quizQuestions: Question[]) => {
+    function shuffle<T>(array: T[]): T[] {
+      const result = [...array];
+      for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+      }
+      return result;
+    }
+
+    const preparedQuestions = quizQuestions.map(q => {
+      if (q.type === 'choice') {
+        const shuffledOptions = shuffle(q.options);
+        return { ...q, options: shuffledOptions };
+      }
+      if (q.type === 'true-false') {
+        const shuffledStatements = shuffle(q.statements);
+        return { ...q, statements: shuffledStatements };
+      }
+      return q;
+    });
+
     setMode('quiz');
-    setQuestions(quizQuestions);
+    setQuestions(preparedQuestions);
     setWrongQuestions([]);
     setCurrentIndex(0);
     setScore(0);
@@ -229,12 +250,10 @@ function QuizContent() {
       setMatchingAnswers({});
       setInputAnswer('');
       setIsAnswered(false);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       const now = Date.now();
       setQuizDuration(Math.round((now - quizStartTime) / 1000));
       setMode('result');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [currentIndex, questions.length, isAnswered, quizStartTime]);
 
