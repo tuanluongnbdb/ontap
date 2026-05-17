@@ -78,6 +78,7 @@ function QuizContent() {
   const [matchingAnswers, setMatchingAnswers] = useState<Record<string, string>>({});
   const [inputAnswer, setInputAnswer] = useState<string>('');
   const [isAnswered, setIsAnswered] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const [quizStartTime, setQuizStartTime] = useState<number>(0);
   const [quizDuration, setQuizDuration] = useState<number>(0);
   const [currentTopicId, setCurrentTopicId] = useState<string | null>(null);
@@ -136,6 +137,7 @@ function QuizContent() {
     setMatchingAnswers({});
     setInputAnswer('');
     setIsAnswered(false);
+    setFocusedIndex(null);
     const now = Date.now();
     setQuizStartTime(now);
   }, []);
@@ -211,17 +213,17 @@ function QuizContent() {
     setTimeout(() => setShowFeedback('none'), 1500);
   }, [isAnswered, currentQuestion]);
 
-  const handleTFAnswer = (statementId: string, value: boolean) => {
+  const handleTFAnswer = useCallback((statementId: string, value: boolean) => {
     if (isAnswered) return;
     playSound('click');
     setTfAnswers(prev => ({ ...prev, [statementId]: value }));
-  };
+  }, [isAnswered]);
 
-  const handleMatchingAnswer = (left: string, right: string) => {
+  const handleMatchingAnswer = useCallback((left: string, right: string) => {
     if (isAnswered) return;
     playSound('click');
     setMatchingAnswers(prev => ({ ...prev, [left]: right }));
-  };
+  }, [isAnswered]);
 
   const handleValidateComposite = useCallback(() => {
     if (isAnswered) return;
@@ -255,6 +257,7 @@ function QuizContent() {
       setMatchingAnswers({});
       setInputAnswer('');
       setIsAnswered(false);
+      setFocusedIndex(null);
     } else {
       const now = Date.now();
       setQuizDuration(Math.round((now - quizStartTime) / 1000));
@@ -265,25 +268,71 @@ function QuizContent() {
   // Keyboard controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (mode === 'quiz' && !isAnswered && currentQuestion && currentQuestion.type === 'choice') {
-        if (e.key === '1') handleAnswer(currentQuestion.options[0]);
-        if (e.key === '2') handleAnswer(currentQuestion.options[1]);
-        if (e.key === '3') handleAnswer(currentQuestion.options[2]);
-        if (e.key === '4') handleAnswer(currentQuestion.options[3]);
+      // Prevent default for space to avoid scrolling when in quiz
+      if (e.key === ' ' && mode === 'quiz' && currentQuestion?.type !== 'input') {
+        e.preventDefault();
       }
-      
-      if (e.key === 'Enter') {
-        if (mode === 'quiz') {
-          if (isAnswered) {
-            handleNext();
-          } else if (currentQuestion && (currentQuestion.type === 'true-false' || currentQuestion.type === 'matching')) {
-            // Check if all answered
-            if (currentQuestion.type === 'true-false' && Object.keys(tfAnswers).length === currentQuestion.statements.length) {
-              handleValidateComposite();
-            } else if (currentQuestion.type === 'matching' && Object.keys(matchingAnswers).length === currentQuestion.pairs.length) {
-              handleValidateComposite();
+
+      if (mode === 'quiz' && !isAnswered && currentQuestion) {
+        // Choice questions cycling and direct selection
+        if (currentQuestion.type === 'choice') {
+          // Direct selection 1-4
+          if (['1', '2', '3', '4'].includes(e.key)) {
+            handleAnswer(currentQuestion.options[parseInt(e.key) - 1]);
+          }
+          // Cycling with Space: 1 tap = A, 2 taps = B...
+          if (e.key === ' ') {
+            setFocusedIndex(prev => {
+              if (prev === null) return 0;
+              return (prev + 1) % currentQuestion.options.length;
+            });
+          }
+          // Confirm cycling selection with Enter
+          if (e.key === 'Enter' && focusedIndex !== null) {
+            handleAnswer(currentQuestion.options[focusedIndex]);
+            return; // Prevent Enter from also triggering handleNext if it was somehow shared
+          }
+        }
+
+        // True/False logic: number to select, D/S to answer
+        if (currentQuestion.type === 'true-false') {
+          // Select statement by number
+          if (['1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(e.key)) {
+            const idx = parseInt(e.key) - 1;
+            if (idx < currentQuestion.statements.length) {
+              setFocusedIndex(idx);
             }
           }
+          // Set answer for focused statement
+          if (focusedIndex !== null && focusedIndex < currentQuestion.statements.length) {
+            if (e.key.toLowerCase() === 'd') {
+              handleTFAnswer(currentQuestion.statements[focusedIndex].id, true);
+            } else if (e.key.toLowerCase() === 's') {
+              handleTFAnswer(currentQuestion.statements[focusedIndex].id, false);
+            }
+          }
+          // Validate when Enter is pressed and all are answered
+          if (e.key === 'Enter') {
+            if (Object.keys(tfAnswers).length === currentQuestion.statements.length) {
+              handleValidateComposite();
+              return;
+            }
+          }
+        }
+
+        // Matching: Numbers could select rows, but it's complex. Let's stick to the requested core.
+        if (currentQuestion.type === 'matching') {
+          if (e.key === 'Enter' && Object.keys(matchingAnswers).length === currentQuestion.pairs.length) {
+            handleValidateComposite();
+            return;
+          }
+        }
+      }
+      
+      // Global navigation with Enter
+      if (e.key === 'Enter') {
+        if (mode === 'quiz' && isAnswered) {
+          handleNext();
         } else if (mode === 'result') {
           setMode('selection');
         }
@@ -292,7 +341,7 @@ function QuizContent() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [mode, isAnswered, currentQuestion, handleAnswer, handleNext, tfAnswers, matchingAnswers, handleValidateComposite]);
+  }, [mode, isAnswered, currentQuestion, focusedIndex, handleAnswer, handleNext, tfAnswers, matchingAnswers, handleValidateComposite, handleTFAnswer]);
 
   return (
     <div className="min-h-screen bg-[#F9FAFB] flex flex-col font-sans">
@@ -515,7 +564,7 @@ function QuizContent() {
                         disabled={isAnswered}
                         className={cn(
                           "p-4 sm:p-5 rounded-2xl border-2 text-left transition-all relative flex items-center justify-between group min-h-[64px]",
-                          !isAnswered && "border-slate-100 hover:border-slate-900 bg-white",
+                          !isAnswered && focusedIndex === idx ? "border-slate-900 bg-white ring-2 ring-slate-900 ring-offset-2" : "border-slate-100 bg-white hover:border-slate-900",
                           isAnswered && option === currentQuestion.answer && "border-green-500 bg-green-50 text-green-900",
                           isAnswered && selectedAnswer === option && option !== currentQuestion.answer && "border-red-500 bg-red-50 text-red-900",
                           isAnswered && selectedAnswer !== option && option !== currentQuestion.answer && "border-slate-50 bg-white opacity-50"
@@ -546,7 +595,10 @@ function QuizContent() {
               {currentQuestion.type === 'true-false' && (
                 <div className="space-y-4">
                   {currentQuestion.statements.map((statement, idx) => (
-                    <div key={statement.id} className="bg-white p-4 rounded-2xl border border-slate-100 space-y-3">
+                    <div key={statement.id} className={cn(
+                      "bg-white p-4 rounded-2xl border transition-all space-y-3",
+                      !isAnswered && focusedIndex === idx ? "border-slate-900 shadow-md ring-1 ring-slate-900" : "border-slate-100"
+                    )}>
                       <p className="text-sm font-medium leading-relaxed">
                         <span className="font-bold mr-2">{statement.id}.</span>
                         {statement.text}
